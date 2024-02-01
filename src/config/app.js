@@ -1,13 +1,14 @@
 const express = require("express");
+const morgan = require("morgan");
 
 const errorHandler = require("./../utils/errorHandler");
 const AppError = require("./error");
 
 const app = express();
 
-app.get("/", (req, res, next) => {
-  res.json({ ok: "ok" });
-});
+// Middleware
+app.use(morgan("dev"));
+app.use(express.json());
 
 // Not page found
 app.all("*", (req, res, next) => {
