@@ -1,4 +1,5 @@
 const httpStatus = require("./httpStatus");
+const logger = require("./../config/logger");
 
 const sendErrorDev = (error, req, res) => {
   res.status(error.statusCode).json({
@@ -17,7 +18,6 @@ const sendErrorProd = (error, req, res) => {
 };
 
 module.exports = (error, req, res, next) => {
-  // add error logging
   error.statusCode = error.statusCode || 500;
   error.status = error.status || httpStatus.ERROR;
   if (process.env.NODE_ENV === "development") {

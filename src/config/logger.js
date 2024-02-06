@@ -1,6 +1,6 @@
 const winston = require("winston");
 
-const dateFormat = () => new Date(Date.now()).toISOString();
+const dateFormat = () => new Date(Date.now()).toLocaleString();
 
 class Logger {
   constructor() {
@@ -10,8 +10,10 @@ class Logger {
         let message = `${dateFormat()} | ${info.level.toUpperCase()} | ${
           info.message
         }`;
+        message = info.obj ? message + `\n${info.obj}` : message;
         return message;
       }),
+
       transports: [
         new winston.transports.Console(),
         new winston.transports.File({
@@ -23,6 +25,10 @@ class Logger {
         }),
       ],
     });
+
+    // if (process.env.NODE_ENV !== "production") {
+    //   this.logger.format = winston.format.json();
+    // }
   }
 
   log(level, message) {
@@ -37,9 +43,9 @@ class Logger {
     this.logger.warn(message);
   }
 
-  error(message) {
-    this.logger.error(message);
+  error(message, obj) {
+    this.logger.error(message, obj);
   }
 }
-
-module.exports = Logger;
+const logger = new Logger();
+module.exports = logger;

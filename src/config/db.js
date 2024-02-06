@@ -1,5 +1,7 @@
 const { Sequelize } = require("sequelize");
 
+const logger = require("./logger");
+
 const sequelize = new Sequelize({
   dialect: "postgres",
   host: process.env.DATABASE_HOST,
@@ -7,6 +9,7 @@ const sequelize = new Sequelize({
   database: process.env.DATABASE_NAME,
   username: process.env.DATABASE_USER,
   password: process.env.DATABASE_PASS,
+  // logging: (msg) => logger.info(msg),
   logging: false,
 });
 
