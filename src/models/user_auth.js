@@ -25,13 +25,10 @@ const User_Auth = sequelize.define(
     timestamps: true,
     indexes: [
       {
-        unique: true,
         fields: ["user_id"],
       },
     ],
   }
 );
-
-User_Auth.removeAttribute("id");
 
 module.exports = User_Auth;

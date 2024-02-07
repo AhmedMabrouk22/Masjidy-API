@@ -1,5 +1,6 @@
 node_modules/
 logs/
+undefined/
 .env
 dbErd.drawio
 Schema.drawio

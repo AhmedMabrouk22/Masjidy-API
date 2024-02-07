@@ -1,8 +1,7 @@
 const { Sequelize } = require("sequelize");
+require("./environment");
 
-const logger = require("./logger");
-
-const sequelize = new Sequelize({
+let dbConfig = {
   dialect: "postgres",
   host: process.env.DATABASE_HOST,
   port: process.env.DATABASE_PORT,
@@ -11,6 +10,12 @@ const sequelize = new Sequelize({
   password: process.env.DATABASE_PASS,
   // logging: (msg) => logger.info(msg),
   logging: false,
-});
+};
+
+// if (process.env.NODE_ENV === "test") {
+//   dbConfig.database = process.env.TEST_DATABASE_NAME;
+// }
+
+const sequelize = new Sequelize(dbConfig);
 
 module.exports = sequelize;

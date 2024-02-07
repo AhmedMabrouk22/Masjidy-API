@@ -19,7 +19,6 @@ process.on("exit", () => {
   logger.info("Process exiting...");
 });
 
-const dotenv = require("./src/config/environment");
 const logger = require("./src/config/logger");
 const sequelize = require("./src/config/db");
 const app = require("./src/config/app");
@@ -27,21 +26,15 @@ const app = require("./src/config/app");
 sequelize
   .authenticate()
   .then(() => {
-    logger.info("Database connected successfully");
-    sequelize
-      .sync({ force: true })
-      .then(() => {
-        logger.info("database synced");
-      })
-      .catch((err) => {
-        logger.error("Error syncing database:", err);
-      });
+    logger.info("Database connection established successfully");
   })
   .catch((err) => {
-    logger.error(err);
+    logger.error("Unable to connect to the database:", err);
   });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  logger.info(`APP running on PORT ${PORT}`);
+const server = app.listen(PORT, () => {
+  logger.info(`APP running on PORT ${PORT} on ${process.env.NODE_ENV} mode`);
 });
+
+module.exports = server;
