@@ -72,7 +72,9 @@ City.belongsTo(State, {
   onUpdate: "CASCADE",
 });
 
-sequelize.sync({ force: false });
+if (process.env.NODE_ENV !== "test") {
+  sequelize.sync({ force: false });
+}
 
 module.exports = {
   User,

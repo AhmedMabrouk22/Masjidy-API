@@ -194,7 +194,7 @@ exports.verifyResetCode = async (email, code) => {
       },
     });
     if (!userAuth) {
-      throw new AppError(404, "Invalid or expired reset code", true);
+      throw new AppError(400, "Invalid or expired reset code", true);
     }
 
     await userAuth.update(

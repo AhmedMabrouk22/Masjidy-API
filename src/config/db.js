@@ -1,5 +1,6 @@
 const { Sequelize } = require("sequelize");
 require("./environment");
+const logger = require("./logger");
 
 let dbConfig = {
   dialect: "postgres",
@@ -12,9 +13,9 @@ let dbConfig = {
   logging: false,
 };
 
-// if (process.env.NODE_ENV === "test") {
-//   dbConfig.database = process.env.TEST_DATABASE_NAME;
-// }
+if (process.env.NODE_ENV === "test") {
+  dbConfig.database = process.env.TEST_DATABASE_NAME;
+}
 
 const sequelize = new Sequelize(dbConfig);
 
