@@ -1,10 +1,13 @@
 const express = require("express");
 const morgan = require("morgan");
 const bodyParser = require("body-parser");
+const path = require("path");
 
 const errorHandler = require("./../utils/errorHandler");
-const authRouter = require("./../routes/authRoute");
 const AppError = require("./../config/error");
+
+const authRouter = require("./../routes/authRoute");
+const userRouter = require("./../routes/userRoute");
 
 const app = express();
 
@@ -12,9 +15,11 @@ const app = express();
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(bodyParser.json());
+app.use(express.static(path.join(__dirname, "../", "uploads")));
 
 // Routes
 app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/users", userRouter);
 
 // Not page found
 app.all("*", (req, res, next) => {

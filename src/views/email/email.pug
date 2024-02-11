@@ -1,0 +1,58 @@
+doctype html
+html(lang='ar')
+  head
+    meta(charset='UTF-8')
+    meta(name='viewport', content='width=device-width, initial-scale=1.0')
+    title Email
+    style
+      | body {
+      |   direction: rtl;
+      |   font-family: "Almarai", sans-serif;
+      |   margin: 0;
+      |   padding: 0;
+      |   background-color: #f4f4f4;
+      | }
+      | .container {
+      |   max-width: 600px;
+      |   margin: 0 auto;
+      |   padding: 20px;
+      |   background-color: #fff;
+      | }
+      | header {
+      |   text-align: center;
+      |   margin-bottom: 20px;
+      |   border-bottom: 2px solid #32ac68;
+      | }
+      | header img {
+      |   max-width: 100px;
+      |   height: auto;
+      | }
+      | h1 {
+      |   color: #333;
+      | }
+      | p {
+      |   color: #666;
+      | }
+      | h3 {
+      |   text-align: center;
+      |   margin-top: 50px;
+      |   font-size: 40px;
+      |   font-weight: bold;
+      | }
+      | p.code {
+      |   color: #32ac68;
+      |   font-weight: bold;
+      |   font-size: 50px;
+      |   text-align: center;
+      |   letter-spacing: 20px;
+      | }
+    link(rel='preconnect', href='https://fonts.googleapis.com')
+    link(rel='preconnect', href='https://fonts.gstatic.com', crossorigin='')
+    link(href='https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;700&display=swap', rel='stylesheet')
+  body(dir='rtl')
+    .container
+      header
+        img(src=url + '/Main_Logo.jpg' , alt='مسجدي')
+        h1 مسجدي
+      h1 مرحبا #{firstName}
+      block message

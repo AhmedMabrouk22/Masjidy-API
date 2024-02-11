@@ -1,30 +1,31 @@
 const sequelize = require("./../config/db");
 const { DataTypes } = require("sequelize");
 
-const User_Auth = sequelize.define(
-  "user_auth",
+const RefreshToken = sequelize.define(
+  "refresh_tokens",
   {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
     user_id: {
       type: DataTypes.INTEGER,
     },
-    reset_password_code: {
+    token: {
       type: DataTypes.STRING,
     },
-    reset_code_expires_at: {
+    expireAt: {
       type: DataTypes.DATE,
-    },
-    is_verified: {
-      type: DataTypes.BOOLEAN,
     },
   },
   {
-    timestamps: true,
     indexes: [
       {
-        fields: ["user_id", "reset_password_code"],
+        fields: ["token"],
       },
     ],
   }
 );
 
-module.exports = User_Auth;
+module.exports = RefreshToken;

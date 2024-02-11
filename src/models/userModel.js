@@ -1,9 +1,5 @@
 const sequelize = require("./../config/db");
 const { DataTypes } = require("sequelize");
-const City = require("./cityModel");
-const State = require("./stateModel");
-const District = require("./districtModel");
-const User_Auth = require("./user_auth");
 
 const User = sequelize.define(
   "user",
@@ -63,15 +59,5 @@ const User = sequelize.define(
     timestamps: true,
   }
 );
-
-User.hasOne(User_Auth, {
-  foreignKey: "user_id",
-  onDelete: "CASCADE",
-  onUpdate: "CASCADE",
-});
-
-User.belongsTo(State, { foreignKey: "state_id" });
-User.belongsTo(City, { foreignKey: "city_id" });
-User.belongsTo(District, { foreignKey: "district_id" });
 
 module.exports = User;

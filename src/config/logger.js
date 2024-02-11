@@ -1,5 +1,7 @@
 const winston = require("winston");
 
+require("./environment");
+
 const dateFormat = () => new Date(Date.now()).toLocaleString();
 
 class Logger {

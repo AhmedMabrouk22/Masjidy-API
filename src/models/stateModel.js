@@ -1,6 +1,5 @@
 const sequelize = require("./../config/db");
 const { DataTypes } = require("sequelize");
-const City = require("./cityModel");
 
 const State = sequelize.define("states", {
   id: {
@@ -12,12 +11,6 @@ const State = sequelize.define("states", {
     type: DataTypes.STRING,
     allowNull: false,
   },
-});
-
-State.hasMany(City, {
-  foreignKey: "state_id",
-  onDelete: "CASCADE",
-  onUpdate: "CASCADE",
 });
 
 module.exports = State;

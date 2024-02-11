@@ -7,6 +7,11 @@ const dbUniqueConstraintError = (error) => {
   return new AppError(400, message, true);
 };
 
+const tokenExpiredError = (error) => {
+  const message = "Unauthorized! Access Token was expired!";
+  return new AppError(401, message, true);
+};
+
 const sendErrorDev = (error, req, res) => {
   res.status(error.statusCode).json({
     status: error.status,
@@ -17,10 +22,18 @@ const sendErrorDev = (error, req, res) => {
 };
 
 const sendErrorProd = (error, req, res) => {
-  res.status(error.statusCode).json({
-    status: error.status,
-    message: error.description,
-  });
+  if (error.isOperational === true) {
+    res.status(error.statusCode).json({
+      status: error.status,
+      message: error.description,
+    });
+  } else {
+    logger.error(error, { obj: error.stack });
+    res.status(error.statusCode).json({
+      status: error.status,
+      message: "Something went wrong!",
+    });
+  }
 };
 
 module.exports = (error, req, res, next) => {
@@ -34,8 +47,10 @@ module.exports = (error, req, res, next) => {
     process.env.NODE_ENV === "test"
   ) {
     let err = { ...error };
+    err.stack = error.stack;
     if (err.name === "SequelizeUniqueConstraintError")
       err = dbUniqueConstraintError(err);
+    if (err.name === "TokenExpiredError") err = tokenExpiredError(err);
     sendErrorProd(err, req, res);
   }
 };

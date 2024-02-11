@@ -1,27 +1,10 @@
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
+const { Op } = require("sequelize");
 
 const sequelize = require("./../config/db");
-const User = require("./../models/userModel");
-const User_Auth = require("./../models/user_auth");
+const { User, User_Auth, RefreshToken } = require("./../models/index");
 const AppError = require("./../config/error");
 const logger = require("./../config/logger");
-
-const hashPassword = async (password) => await bcrypt.hashSync(password, 12);
-const comparePassword = async (password, hash) =>
-  await bcrypt.compare(password, hash);
-
-const generateAccessToken = (data) => {
-  return jwt.sign(data, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN,
-  });
-};
-
-const generateRefreshToken = (data) => {
-  return jwt.sign(data, process.env.JWT_REFRESH_SECRET, {
-    expiresIn: process.env.JWT_REFRESH_EXPIRES_IN,
-  });
-};
+const authUtils = require("./../utils/authUtils");
 
 /**
  * Create a new user in the database after checking if the user already exists, hashing the password, generating access and refresh tokens, and storing the refresh token in the database.
@@ -38,7 +21,7 @@ exports.createUser = async (user) => {
     }
 
     // hash password
-    const hashedPassword = await hashPassword(user.password);
+    const hashedPassword = await authUtils.hashPassword(user.password);
     user.password = hashedPassword;
 
     // create user
@@ -46,19 +29,14 @@ exports.createUser = async (user) => {
       let newUser = await User.create(user, { transaction: t });
 
       // generate access and refresh token
-      const access_token = generateAccessToken({ id: newUser.id });
-      const refresh_token = generateRefreshToken({ id: newUser.id });
+      const access_token = authUtils.generateAccessToken({ id: newUser.id });
+      const refresh_token = authUtils.generateRefreshToken({ id: newUser.id });
       newUser.dataValues.access_token = access_token;
       newUser.dataValues.refresh_token = refresh_token;
 
       // store refresh token in db
-      await User_Auth.create(
-        {
-          user_id: newUser.id,
-          refresh_token,
-        },
-        { transaction: t }
-      );
+      token = authUtils.createRefreshToken(newUser.id, refresh_token);
+      await RefreshToken.create(token, { transaction: t });
 
       delete newUser.dataValues["password"];
       logger.info(`User with ID ${newUser.dataValues.id} created.`);
@@ -87,22 +65,193 @@ exports.login = async (email, password) => {
     let user = await User.findOne({ where: { email } });
 
     // compare password
-    if ((user && !(await comparePassword(password, user.password))) || !user) {
+    if (
+      (user && !(await authUtils.comparePassword(password, user.password))) ||
+      !user
+    ) {
       throw new AppError(404, "Invalid email or password", true);
     }
 
     // generate access and refresh token
-    const access_token = generateAccessToken({ id: user.id });
-    const refresh_token = generateRefreshToken({ id: user.id });
+    const access_token = authUtils.generateAccessToken({ id: user.id });
+    const refresh_token = authUtils.generateRefreshToken({ id: user.id });
     user.dataValues.access_token = access_token;
     user.dataValues.refresh_token = refresh_token;
     // add new refresh token (allow login on multiple devices)
-    await User_Auth.create({
-      user_id: user.id,
-      refresh_token,
-    });
+
+    token = authUtils.createRefreshToken(user.id, refresh_token);
+    await RefreshToken.create(token);
+
     delete user.dataValues["password"];
     logger.info(`User with ID ${user.dataValues.id} logged in.`);
+    return user;
+  } catch (error) {
+    throw error;
+  }
+};
+
+/**
+ * Retrieves a user by their user ID.
+ *
+ * @param {number} user_id - The ID of the user to retrieve
+ * @return {Promise<User>} The user object if found
+ */
+exports.getUser = async (user_id) => {
+  try {
+    const user = await User.findOne({
+      where: { id: user_id },
+      attributes: { exclude: ["password"] },
+    });
+    // delete user.dataValues["password"];
+    if (!user) {
+      throw new AppError(404, "User not found", true);
+    }
+    return user;
+  } catch (error) {
+    throw error;
+  }
+};
+
+/**
+ * Retrieves all users excluding their passwords.
+ *
+ * @return {Array} The array of users.
+ */
+exports.getUsers = async () => {
+  try {
+    const users = await User.findAll({
+      attributes: { exclude: ["password"] },
+    });
+    return users;
+  } catch (error) {
+    throw error;
+  }
+};
+
+/**
+ * Function to handle the process of resetting a user's password.
+ *
+ * @param {string} user_email - The email of the user requesting the password reset
+ * @return {Promise} A promise that resolves when the password reset process is completed
+ */
+exports.forgetPassword = async (user_email) => {
+  try {
+    // Get user
+    const user = await User.findOne({ where: { email: user_email } });
+    if (!user) {
+      throw new AppError(404, "User not found", true);
+    }
+
+    // Generate the random reset code
+    const resetCode = authUtils.generateRandomCode();
+    const hashedResetCode = authUtils.hashResetCode(resetCode);
+
+    // Save reset code on user auth
+    const userAuth = await User_Auth.create({
+      user_id: user.id,
+      reset_password_code: hashedResetCode,
+      reset_code_expires_at: new Date(
+        Date.now() + 30 * 60 * 1000
+      ).toUTCString(),
+      is_verified: false,
+    });
+
+    // send email to user
+    await authUtils.sendMail(
+      userAuth.dataValues.id,
+      user.dataValues,
+      resetCode
+    );
+    logger.info(`Password reset code sent to ${user_email}.`);
+  } catch (error) {
+    throw error;
+  }
+};
+
+/**
+ * Verifies the reset code for a user's password reset.
+ *
+ * @param {string} email - The email of the user
+ * @param {string} code - The reset code to verify
+ * @return {Promise<void>} A promise that resolves with no value upon successful verification
+ */
+exports.verifyResetCode = async (email, code) => {
+  try {
+    // get user
+    const user = await User.findOne({ where: { email } });
+    if (!user) {
+      throw new AppError(404, "User not found", true);
+    }
+
+    const hashedCode = authUtils.hashResetCode(code);
+    // get user auth
+    const userAuth = await User_Auth.findOne({
+      where: {
+        user_id: user.dataValues.id,
+        reset_password_code: hashedCode,
+        is_verified: false,
+        reset_code_expires_at: { [Op.gte]: new Date(Date.now()).toUTCString() },
+      },
+    });
+    if (!userAuth) {
+      throw new AppError(404, "Invalid or expired reset code", true);
+    }
+
+    await userAuth.update(
+      {
+        is_verified: true,
+        reset_password_code: null,
+        reset_code_expires_at: null,
+      },
+      {
+        where: {
+          user_id: userAuth.dataValues.id,
+        },
+      }
+    );
+  } catch (error) {
+    throw error;
+  }
+};
+
+/**
+ * Resets the user's password and updates the access and refresh tokens.
+ *
+ * @param {string} email - The email of the user
+ * @param {string} password - The new password to be set
+ * @return {Promise<object>} The updated user object with new access and refresh tokens
+ */
+exports.resetPassword = async (email, password) => {
+  try {
+    // get user
+    const user = await User.findOne({ where: { email } });
+    if (!user) {
+      throw new AppError(404, "User not found", true);
+    }
+
+    // hash password
+    const hashedPassword = await authUtils.hashPassword(password);
+    user.password = hashedPassword;
+    await user.save();
+
+    // delete user auth
+    await User_Auth.destroy({ where: { user_id: user.dataValues.id } });
+
+    // delete all user refresh tokens
+    await RefreshToken.destroy({ where: { user_id: user.dataValues.id } });
+
+    // generate access and refresh token
+    const access_token = authUtils.generateAccessToken({ id: newUser.id });
+    const refresh_token = authUtils.generateRefreshToken({ id: newUser.id });
+    user.dataValues.access_token = access_token;
+    user.dataValues.refresh_token = refresh_token;
+
+    // add new refresh token
+    const token = authUtils.createRefreshToken(user.id, refresh_token);
+    await RefreshToken.create(token);
+
+    logger.info(`Password reset for ${email}.`);
+
     return user;
   } catch (error) {
     throw error;
