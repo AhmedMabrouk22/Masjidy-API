@@ -1,0 +1,1 @@
+{ obj: error.stack }

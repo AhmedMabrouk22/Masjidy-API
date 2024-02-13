@@ -12,6 +12,10 @@ const tokenExpiredError = (error) => {
   return new AppError(401, message, true);
 };
 
+const multerLimitFile = () => {
+  return new AppError(400, "You can only upload at most 5 images", true);
+};
+
 const sendErrorDev = (error, req, res) => {
   res.status(error.statusCode).json({
     status: error.status,
@@ -51,6 +55,7 @@ module.exports = (error, req, res, next) => {
     if (err.name === "SequelizeUniqueConstraintError")
       err = dbUniqueConstraintError(err);
     if (err.name === "TokenExpiredError") err = tokenExpiredError(err);
+    if (err.code === "LIMIT_UNEXPECTED_FILE") err = multerLimitFile();
     sendErrorProd(err, req, res);
   }
 };

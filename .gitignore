@@ -1,6 +1,9 @@
 node_modules/
 logs/
 undefined/
+.vscode/
+uploads/
 .env
 dbErd.drawio
 Schema.drawio
+ERD.png

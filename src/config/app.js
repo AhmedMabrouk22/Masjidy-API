@@ -8,6 +8,7 @@ const AppError = require("./../config/error");
 
 const authRouter = require("./../routes/authRoute");
 const userRouter = require("./../routes/userRoute");
+const masjidRouter = require("./../routes/masjidRoute");
 
 const app = express();
 
@@ -20,6 +21,7 @@ app.use(express.static(path.join(__dirname, "../", "uploads")));
 // Routes
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/users", userRouter);
+app.use("/api/v1/masjids", masjidRouter);
 
 // Not page found
 app.all("*", (req, res, next) => {

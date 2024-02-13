@@ -5,8 +5,13 @@ const RefreshToken = require("./refreshTokenModel");
 const State = require("./stateModel");
 const City = require("./cityModel");
 const District = require("./districtModel");
+const Masjid = require("./masjidModel");
+const MasjidFeatures = require("./masjidFeatures");
+const MasjidImages = require("./masjidImagesModel");
 
 // relationships
+
+// user
 User.hasOne(User_Auth, {
   foreignKey: "user_id",
   onDelete: "CASCADE",
@@ -48,14 +53,9 @@ User_Auth.belongsTo(User, {
   onUpdate: "CASCADE",
 });
 
+// City
 City.hasMany(District, {
   foreignKey: "city_id",
-  onDelete: "CASCADE",
-  onUpdate: "CASCADE",
-});
-
-State.hasMany(City, {
-  foreignKey: "state_id",
   onDelete: "CASCADE",
   onUpdate: "CASCADE",
 });
@@ -66,14 +66,46 @@ District.belongsTo(City, {
   onUpdate: "CASCADE",
 });
 
+// State
+State.hasMany(City, {
+  foreignKey: "state_id",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+
 City.belongsTo(State, {
   foreignKey: "state_id",
   onDelete: "CASCADE",
   onUpdate: "CASCADE",
 });
 
+// Masjid
+Masjid.hasOne(MasjidFeatures, {
+  foreignKey: "masjid_id",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+
+MasjidFeatures.belongsTo(Masjid, {
+  foreignKey: "masjid_id",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+
+Masjid.hasMany(MasjidImages, {
+  foreignKey: "masjid_id",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+
+MasjidImages.belongsTo(Masjid, {
+  foreignKey: "masjid_id",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+
 if (process.env.NODE_ENV !== "test") {
-  sequelize.sync({ force: false });
+  sequelize.sync({ force: false, alter: true });
 }
 
 module.exports = {
@@ -83,4 +115,7 @@ module.exports = {
   State,
   City,
   District,
+  Masjid,
+  MasjidFeatures,
+  MasjidImages,
 };

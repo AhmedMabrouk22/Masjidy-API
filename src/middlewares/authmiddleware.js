@@ -55,7 +55,14 @@ exports.protect = catchAsync(async (req, res, next) => {
     where: {
       id: decoded.id,
     },
-    attributes: ["id", "email", "first_name", "last_name", "image_path"],
+    attributes: [
+      "id",
+      "email",
+      "first_name",
+      "last_name",
+      "image_path",
+      "user_type",
+    ],
   });
 
   req.curUser = user.dataValues;
@@ -64,7 +71,7 @@ exports.protect = catchAsync(async (req, res, next) => {
 
 exports.restrictTo = (...roles) => {
   return (req, res, next) => {
-    if (!roles.includes(req.curUser.role)) {
+    if (!roles.includes(req.curUser.user_type)) {
       return next(
         new AppError(
           403,
