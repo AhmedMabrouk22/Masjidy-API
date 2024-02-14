@@ -16,3 +16,54 @@ exports.addMasjid = catchAsync(async (req, res, next) => {
     },
   });
 });
+
+exports.deleteMasjid = catchAsync(async (req, res, next) => {
+  await masjidServices.deleteMasjid(req.params.masjid_id);
+  logger.info(
+    `${req.curUser.user_type} with ID ${req.curUser.id} delete masjid with ID ${req.params.masjid_id}`
+  );
+  res.status(200).json({
+    status: httpStatus.SUCCESS,
+    message: "Masjid deleted successfully",
+  });
+});
+
+exports.getMasjid = catchAsync(async (req, res, next) => {
+  const masjid = await masjidServices.getMasjid(req.params.masjid_id);
+  res.status(200).json({
+    status: httpStatus.SUCCESS,
+    data: {
+      masjid,
+    },
+  });
+});
+
+exports.getAllMasjids = catchAsync(async (req, res, next) => {
+  const masjids = await masjidServices.getAllMasjids(
+    req.query.page,
+    req.query.limit
+  );
+  res.status(200).json({
+    status: httpStatus.SUCCESS,
+    result: masjids.length,
+    data: {
+      masjids,
+    },
+  });
+});
+
+exports.updateMasjid = catchAsync(async (req, res, next) => {
+  req.body.id = req.params.masjid_id;
+
+  await masjidServices.updateMasjid(req.body);
+  logger.info(
+    `${req.curUser.user_type} with ID ${req.curUser.id} update masjid with ID ${req.params.masjid_id}`
+  );
+  res.status(200).json({
+    status: httpStatus.SUCCESS,
+    message: "Masjid updated successfully",
+    data: {
+      masjid_id: req.params.masjid_id,
+    },
+  });
+});

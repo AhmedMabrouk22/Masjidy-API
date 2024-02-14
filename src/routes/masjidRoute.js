@@ -1,6 +1,12 @@
 const express = require("express");
 
-const { addMasjid } = require("./../controllers/masjidController");
+const {
+  addMasjid,
+  deleteMasjid,
+  getMasjid,
+  getAllMasjids,
+  updateMasjid,
+} = require("./../controllers/masjidController");
 const masjidValidators = require("./../validators/masjidValidators");
 const uploadImage = require("./../middlewares/uploadImageMiddleware");
 
@@ -17,6 +23,26 @@ router
     uploadImage.resizeImage("Masjid"),
     masjidValidators.createMasjid,
     addMasjid
+  )
+  .get(getAllMasjids);
+
+router
+  .route("/:masjid_id")
+  .get(masjidValidators.masjidID, getMasjid)
+  .patch(
+    protect,
+    restrictTo("admin", "manager"),
+    uploadImage.uploadMultiImages("images", 5),
+    uploadImage.resizeImage("Masjid"),
+    masjidValidators.masjidID,
+    masjidValidators.updateMasjid,
+    updateMasjid
+  )
+  .delete(
+    protect,
+    restrictTo("admin", "manager"),
+    masjidValidators.masjidID,
+    deleteMasjid
   );
 
 module.exports = router;

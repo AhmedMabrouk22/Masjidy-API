@@ -1,6 +1,9 @@
 const sequelize = require("./../config/db");
 const { DataTypes } = require("sequelize");
 
+const MasjidImages = require("./masjidImagesModel");
+const filesUtils = require("./../utils/filesUtils");
+
 const Masjid = sequelize.define("masjids", {
   id: {
     type: DataTypes.INTEGER,
@@ -42,6 +45,16 @@ const Masjid = sequelize.define("masjids", {
   street: {
     type: DataTypes.STRING,
   },
+});
+
+Masjid.beforeDestroy(async (masjid) => {
+  const images = await MasjidImages.findAll({
+    where: { masjid_id: masjid.id },
+    attributes: ["image_path"],
+  });
+  for (const image of images) {
+    filesUtils.deleteFiles([image.image_path]);
+  }
 });
 
 module.exports = Masjid;
