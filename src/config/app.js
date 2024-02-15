@@ -9,6 +9,7 @@ const AppError = require("./../config/error");
 const authRouter = require("./../routes/authRoute");
 const userRouter = require("./../routes/userRoute");
 const masjidRouter = require("./../routes/masjidRoute");
+const sheikhRouter = require("./../routes/sheikhRoute");
 
 const app = express();
 
@@ -22,6 +23,7 @@ app.use(express.static(path.join(__dirname, "../", "uploads")));
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/masjids", masjidRouter);
+app.use("/api/v1/sheikhs", sheikhRouter);
 
 // Not page found
 app.all("*", (req, res, next) => {

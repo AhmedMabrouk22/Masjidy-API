@@ -16,6 +16,13 @@ const multerLimitFile = () => {
   return new AppError(400, "You can only upload at most 5 images", true);
 };
 
+const fkError = (error) => {
+  const regex = /\((\w+)\)/;
+  const match = regex.exec(error.parent.detail);
+
+  return new AppError(400, `${match[0]} not found`, true);
+};
+
 const sendErrorDev = (error, req, res) => {
   res.status(error.statusCode).json({
     status: error.status,
@@ -56,6 +63,7 @@ module.exports = (error, req, res, next) => {
       err = dbUniqueConstraintError(err);
     if (err.name === "TokenExpiredError") err = tokenExpiredError(err);
     if (err.code === "LIMIT_UNEXPECTED_FILE") err = multerLimitFile();
+    if (err.name === "SequelizeForeignKeyConstraintError") err = fkError(err);
     sendErrorProd(err, req, res);
   }
 };

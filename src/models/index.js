@@ -8,6 +8,9 @@ const District = require("./districtModel");
 const Masjid = require("./masjidModel");
 const MasjidFeatures = require("./masjidFeatures");
 const MasjidImages = require("./masjidImagesModel");
+const Sheikh = require("./sheikhModel");
+const SheikhFeatures = require("./sheikhFeatureModel");
+const SheikhPhoneNumbers = require("./sheikhPhonenumbersModel");
 
 // relationships
 
@@ -104,6 +107,43 @@ MasjidImages.belongsTo(Masjid, {
   onUpdate: "CASCADE",
 });
 
+Masjid.hasMany(Sheikh, {
+  foreignKey: "masjid_id",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+
+// Sheikh
+Sheikh.belongsTo(Masjid, {
+  foreignKey: "masjid_id",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+
+Sheikh.hasOne(SheikhFeatures, {
+  foreignKey: "sheikh_id",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+
+SheikhFeatures.belongsTo(Sheikh, {
+  foreignKey: "sheikh_id",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+
+Sheikh.hasMany(SheikhPhoneNumbers, {
+  foreignKey: "sheikh_id",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+
+SheikhPhoneNumbers.belongsTo(Sheikh, {
+  foreignKey: "sheikh_id",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+
 if (process.env.NODE_ENV !== "test") {
   sequelize.sync({ force: false, alter: true });
 }
@@ -118,4 +158,7 @@ module.exports = {
   Masjid,
   MasjidFeatures,
   MasjidImages,
+  Sheikh,
+  SheikhFeatures,
+  SheikhPhoneNumbers,
 };
