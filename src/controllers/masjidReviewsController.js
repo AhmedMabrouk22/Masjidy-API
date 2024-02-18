@@ -23,11 +23,14 @@ exports.createReview = catchAsync(async (req, res, next) => {
 });
 
 exports.getAllReviews = catchAsync(async (req, res, next) => {
-  const reviews = await masjidReviewsServices.getAllReviews(
-    req.params.masjid_id,
-    req.query.page,
-    req.query.limit
-  );
+  let config = {
+    page: req.query.page,
+    limit: req.query.limit,
+  };
+  if (req.params.masjid_id) {
+    config.masjid_id = req.params.masjid_id;
+  }
+  const reviews = await masjidReviewsServices.getAllReviews(config);
   res.status(200).json({
     status: httpStatus.SUCCESS,
     results: reviews.length,
@@ -38,7 +41,7 @@ exports.getAllReviews = catchAsync(async (req, res, next) => {
 });
 
 exports.updateReviews = catchAsync(async (req, res, next) => {
-  req.body.id = req.params.review_id;
+  req.body.review_id = req.params.review_id;
   req.body.user_id = req.curUser.id;
   await masjidReviewsServices.updateReview(req.body);
   logger.info(

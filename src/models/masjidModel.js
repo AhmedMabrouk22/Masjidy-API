@@ -18,9 +18,6 @@ const Masjid = sequelize.define("masjids", {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  ratings: {
-    type: DataTypes.FLOAT,
-  },
   longitude: {
     type: DataTypes.FLOAT,
     //   allowNull: false,
@@ -44,6 +41,10 @@ const Masjid = sequelize.define("masjids", {
   },
   street: {
     type: DataTypes.STRING,
+  },
+  average_rating: {
+    type: DataTypes.FLOAT,
+    defaultValue: 0,
   },
 });
 
