@@ -1,7 +1,12 @@
 const { Op } = require("sequelize");
 
 const sequelize = require("./../config/db");
-const { Masjid, MasjidFeatures, MasjidImages } = require("./../models/index");
+const {
+  Masjid,
+  MasjidFeatures,
+  MasjidImages,
+  Sheikh,
+} = require("./../models/index");
 const geomPoint = require("./../utils/geomPoint");
 const filesUtils = require("./../utils/filesUtils");
 const AppError = require("./../config/error");
@@ -130,6 +135,10 @@ exports.getMasjid = async (masjid_id) => {
         {
           model: MasjidImages,
           attributes: ["image_path"],
+        },
+        {
+          model: Sheikh,
+          attributes: ["id", "name", "image_path"],
         },
       ],
     });
