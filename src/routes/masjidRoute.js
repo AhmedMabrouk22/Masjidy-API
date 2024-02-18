@@ -9,11 +9,16 @@ const {
 } = require("./../controllers/masjidController");
 const masjidValidators = require("./../validators/masjidValidators");
 const uploadImage = require("./../middlewares/uploadImageMiddleware");
-
 const { protect, restrictTo } = require("./../middlewares/authmiddleware");
+const masjidReviewRouter = require("./masjidReviewsRoute");
 
 const router = express.Router();
 
+router.use(
+  "/:masjid_id/reviews",
+  masjidValidators.masjidID,
+  masjidReviewRouter
+);
 router
   .route("/")
   .post(
