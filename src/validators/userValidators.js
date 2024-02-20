@@ -14,6 +14,19 @@ exports.createUserValidator = [
     .withMessage("Password is required")
     .isLength({ min: 8 })
     .withMessage("Password must be at least 8 characters long"),
+  body("user_type")
+    .optional()
+    .isIn(["admin", "manger", "user"])
+    .withMessage("Invalid user type")
+    .custom((value) => {
+      if (
+        (value === "admin" || value === "manager") &&
+        req.curUser.user_type === "admin"
+      ) {
+        return true;
+      }
+      throw new Error("You don't have permission to perform this action");
+    }),
   validatorMiddleware,
 ];
 

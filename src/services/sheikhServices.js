@@ -2,6 +2,7 @@ const {
   Sheikh,
   SheikhFeatures,
   SheikhPhoneNumbers,
+  Masjid,
 } = require("./../models/index");
 const buildObject = require("./../utils/buildObj");
 const fileUtils = require("./../utils/filesUtils");
@@ -66,6 +67,10 @@ exports.getSheikh = async (sheikh_id) => {
           attributes: {
             exclude: ["id", "sheikh_id", "createdAt", "updatedAt"],
           },
+        },
+        {
+          model: Masjid,
+          attributes: ["id", "name"],
         },
       ],
     });

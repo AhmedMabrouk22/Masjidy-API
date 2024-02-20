@@ -12,6 +12,8 @@ const Sheikh = require("./sheikhModel");
 const SheikhFeatures = require("./sheikhFeatureModel");
 const SheikhPhoneNumbers = require("./sheikhPhonenumbersModel");
 const MasjidReviews = require("./masjidReviewsModels");
+const Lesson = require("./lessonModel");
+const LessonTime = require("./lessonTimeModel");
 
 // relationships
 
@@ -114,6 +116,12 @@ Masjid.hasMany(Sheikh, {
   onUpdate: "CASCADE",
 });
 
+Masjid.hasMany(Lesson, {
+  foreignKey: "masjid_id",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+
 // Sheikh
 Sheikh.belongsTo(Masjid, {
   foreignKey: "masjid_id",
@@ -145,6 +153,12 @@ SheikhPhoneNumbers.belongsTo(Sheikh, {
   onUpdate: "CASCADE",
 });
 
+Sheikh.hasMany(Lesson, {
+  foreignKey: "sheikh_id",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+
 // Reviews
 Masjid.hasMany(MasjidReviews, {
   foreignKey: "masjid_id",
@@ -170,6 +184,31 @@ MasjidReviews.belongsTo(User, {
   onUpdate: "CASCADE",
 });
 
+// Lessons
+Lesson.hasMany(LessonTime, {
+  foreignKey: "lesson_id",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+
+LessonTime.belongsTo(Lesson, {
+  foreignKey: "lesson_id",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+
+Lesson.belongsTo(Masjid, {
+  foreignKey: "masjid_id",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+
+Lesson.belongsTo(Sheikh, {
+  foreignKey: "sheikh_id",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+
 if (process.env.NODE_ENV !== "test") {
   sequelize.sync({ force: false, alter: true });
 }
@@ -188,4 +227,6 @@ module.exports = {
   SheikhFeatures,
   SheikhPhoneNumbers,
   MasjidReviews,
+  Lesson,
+  LessonTime,
 };

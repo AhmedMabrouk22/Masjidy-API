@@ -11,6 +11,7 @@ const userRouter = require("./../routes/userRoute");
 const masjidRouter = require("./../routes/masjidRoute");
 const sheikhRouter = require("./../routes/sheikhRoute");
 const masjidReviewRouter = require("./../routes/masjidReviewsRoute");
+const lessonRouter = require("./../routes/lessonRoute");
 
 const app = express();
 
@@ -26,6 +27,7 @@ app.use("/api/v1/users", userRouter);
 app.use("/api/v1/masjids", masjidRouter);
 app.use("/api/v1/sheikhs", sheikhRouter);
 app.use("/api/v1/masjid-reviews", masjidReviewRouter);
+app.use("/api/v1/lessons", lessonRouter);
 
 // Not page found
 app.all("*", (req, res, next) => {
