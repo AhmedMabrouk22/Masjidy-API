@@ -10,9 +10,11 @@ const {
 const sheikhValidators = require("./../validators/sheikhValidators");
 const uploadImage = require("./../middlewares/uploadImageMiddleware");
 const { protect, restrictTo } = require("./../middlewares/authmiddleware");
+const recordingsRoute = require("./recordingsRouter");
 
 const router = express.Router();
 
+router.use("/:sheikh_id/recordings", recordingsRoute);
 router
   .route("/")
   .post(

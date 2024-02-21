@@ -9,6 +9,13 @@ const generatePath = (fileName) => {
     return path.join(uploadPath, process.env.UPLOADS_PATH, "masjids", fileName);
   } else if (fileName.startsWith("Sheikh")) {
     return path.join(uploadPath, process.env.UPLOADS_PATH, "sheikhs", fileName);
+  } else if (fileName.startsWith("Recordings")) {
+    return path.join(
+      uploadPath,
+      process.env.UPLOADS_PATH,
+      "recordings",
+      fileName
+    );
   }
 };
 

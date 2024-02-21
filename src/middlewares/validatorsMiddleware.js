@@ -10,6 +10,8 @@ module.exports = (req, res, next) => {
       filesUtils.deleteFiles(req.body.images);
     } else if (req.body.image) {
       filesUtils.deleteFiles([req.body.image]);
+    } else if (req.body.audio_path) {
+      filesUtils.deleteFiles([req.body.audio_path]);
     }
 
     return next(new AppError(400, error.array()[0].msg, true));

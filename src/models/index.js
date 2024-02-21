@@ -14,6 +14,7 @@ const SheikhPhoneNumbers = require("./sheikhPhonenumbersModel");
 const MasjidReviews = require("./masjidReviewsModels");
 const Lesson = require("./lessonModel");
 const LessonTime = require("./lessonTimeModel");
+const Recordings = require("./recordingsModel");
 
 // relationships
 
@@ -159,6 +160,18 @@ Sheikh.hasMany(Lesson, {
   onUpdate: "CASCADE",
 });
 
+Sheikh.hasMany(Recordings, {
+  foreignKey: "sheikh_id",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+
+Recordings.belongsTo(Sheikh, {
+  foreignKey: "sheikh_id",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+
 // Reviews
 Masjid.hasMany(MasjidReviews, {
   foreignKey: "masjid_id",
@@ -229,4 +242,5 @@ module.exports = {
   MasjidReviews,
   Lesson,
   LessonTime,
+  Recordings,
 };

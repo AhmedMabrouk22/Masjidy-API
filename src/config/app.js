@@ -12,6 +12,7 @@ const masjidRouter = require("./../routes/masjidRoute");
 const sheikhRouter = require("./../routes/sheikhRoute");
 const masjidReviewRouter = require("./../routes/masjidReviewsRoute");
 const lessonRouter = require("./../routes/lessonRoute");
+const recordingRouter = require("./../routes/recordingsRouter");
 
 const app = express();
 
@@ -28,6 +29,7 @@ app.use("/api/v1/masjids", masjidRouter);
 app.use("/api/v1/sheikhs", sheikhRouter);
 app.use("/api/v1/masjid-reviews", masjidReviewRouter);
 app.use("/api/v1/lessons", lessonRouter);
+app.use("/api/v1/recordings", recordingRouter);
 
 // Not page found
 app.all("*", (req, res, next) => {
