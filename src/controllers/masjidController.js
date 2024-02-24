@@ -39,10 +39,15 @@ exports.getMasjid = catchAsync(async (req, res, next) => {
 });
 
 exports.getAllMasjids = catchAsync(async (req, res, next) => {
-  const masjids = await masjidServices.getAllMasjids(
-    req.query.page,
-    req.query.limit
-  );
+  let config = {
+    page: req.query.page,
+    limit: req.query.limit,
+  };
+  if (req.query.page) delete req.query.page;
+  if (req.query.limit) delete req.query.limit;
+  config.filter = req.query;
+
+  const masjids = await masjidServices.getAllMasjids(config);
   res.status(200).json({
     status: httpStatus.SUCCESS,
     result: masjids.length,

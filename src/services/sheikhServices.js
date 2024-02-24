@@ -1,3 +1,5 @@
+const { Op } = require("sequelize");
+
 const {
   Sheikh,
   SheikhFeatures,
@@ -37,14 +39,38 @@ exports.addSheikh = async (sheikh) => {
   }
 };
 
-exports.getAllSheikhs = async (page, limit) => {
+exports.getAllSheikhs = async (config) => {
   try {
-    page = page * 1 || 1;
-    limit = limit * 1 || 10;
+    // Pagination
+    const page = config.page * 1 || 1;
+    const limit = config.limit * 1 || 10;
     const skip = (page - 1) * limit;
+
+    // filter
+    const query = config.filter;
+
+    const sheikhFilter = buildObject(query, Sheikh.getAttributes());
+    const sheikhFeaturesFilter = buildObject(
+      query,
+      SheikhFeatures.getAttributes()
+    );
+
+    if (query.name) {
+      sheikhFilter.name = {
+        [Op.like]: `%${query.name}%`,
+      };
+    }
     const sheikhs = await Sheikh.findAll({
       offset: skip,
       limit: limit,
+      where: sheikhFilter,
+      include: [
+        {
+          model: SheikhFeatures,
+          where: sheikhFeaturesFilter,
+          attributes: [],
+        },
+      ],
     });
     return sheikhs;
   } catch (error) {

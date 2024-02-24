@@ -29,10 +29,15 @@ exports.deleteSheikh = catchAsync(async (req, res, next) => {
 });
 
 exports.getAllSheikhs = catchAsync(async (req, res, next) => {
-  const sheikhs = await sheikhServices.getAllSheikhs(
-    req.query.page,
-    req.query.limit
-  );
+  let config = {
+    page: req.query.page,
+    limit: req.query.limit,
+  };
+  if (req.query.page) delete req.query.page;
+  if (req.query.limit) delete req.query.limit;
+  config.filter = req.query;
+
+  const sheikhs = await sheikhServices.getAllSheikhs(config);
   res.status(200).json({
     status: httpStatus.SUCCESS,
     result: sheikhs.length,

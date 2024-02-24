@@ -11,6 +11,7 @@ const {
 const geomPoint = require("./../utils/geomPoint");
 const filesUtils = require("./../utils/filesUtils");
 const AppError = require("./../config/error");
+const buildObj = require("./../utils/buildObj");
 
 function buildMasjidObject(data) {
   let masjidObject = {};
@@ -88,26 +89,49 @@ exports.addMasjid = async (masjid) => {
   }
 };
 
-/**
- * Retrieves a list of masjids with optional pagination.
- *
- * @param {number} page - The page number for pagination
- * @param {number} limit - The limit of items per page
- * @return {Promise<Array>} An array of masjid objects
- */
-exports.getAllMasjids = async (page, limit) => {
+exports.getAllMasjids = async (config) => {
   try {
-    page = page * 1 || 1;
-    limit = limit * 1 || 10;
+    // Pagination
+    const page = config.page * 1 || 1;
+    const limit = config.limit * 1 || 10;
     const skip = (page - 1) * limit;
+
+    // filter
+    const query = config.filter;
+
+    const masjidFilter = buildObj(query, Masjid.getAttributes());
+    const masjidFeaturesFilter = buildObj(
+      query,
+      MasjidFeatures.getAttributes()
+    );
+
+    if (query.capacity) {
+      masjidFeaturesFilter.capacity = {
+        [Op.gte]: query.capacity,
+      };
+    }
+
+    if (query.name) {
+      masjidFilter.name = {
+        [Op.like]: `%${query.name}%`,
+      };
+    }
 
     const masjids = await Masjid.findAll({
       offset: skip,
       limit: limit,
-      include: {
-        model: MasjidImages,
-        attributes: ["image_path"],
-      },
+      where: masjidFilter,
+      include: [
+        {
+          model: MasjidImages,
+          attributes: ["image_path"],
+        },
+        {
+          model: MasjidFeatures,
+          where: masjidFeaturesFilter,
+          attributes: [],
+        },
+      ],
     });
 
     return masjids;
