@@ -3,6 +3,7 @@ logs/
 undefined/
 .vscode/
 uploads/
+dev_data/
 .env
 dbErd.drawio
 Schema.drawio

@@ -6,6 +6,9 @@ const {
   getAllSheikhs,
   getSheikh,
   updateSheikh,
+  getFavorite,
+  addFavorite,
+  deleteFavorite,
 } = require("./../controllers/sheikhControllers");
 const sheikhValidators = require("./../validators/sheikhValidators");
 const uploadImage = require("./../middlewares/uploadImageMiddleware");
@@ -26,6 +29,20 @@ router
     addSheikh
   )
   .get(getAllSheikhs);
+
+router
+  .route("/favorite")
+  .get(protect, restrictTo("user"), getFavorite)
+  .post(protect, restrictTo("user"), sheikhValidators.addFav, addFavorite);
+
+router
+  .route("/favorite/:sheikh_id")
+  .delete(
+    protect,
+    restrictTo("user"),
+    sheikhValidators.sheikhId,
+    deleteFavorite
+  );
 
 router
   .route("/:sheikh_id")

@@ -67,3 +67,40 @@ exports.updateMasjid = catchAsync(async (req, res, next) => {
     },
   });
 });
+
+exports.getFavorite = catchAsync(async (req, res, next) => {
+  const config = {
+    page: req.query.page,
+    limit: req.query.limit,
+    user_id: req.curUser.id,
+  };
+  const masjids = await masjidServices.getFavorite(config);
+  res.status(200).json({
+    status: httpStatus.SUCCESS,
+    data: { masjids },
+  });
+});
+
+exports.addFavorite = catchAsync(async (req, res, next) => {
+  const data = {
+    user_id: req.curUser.id,
+    masjid_id: req.body.masjid_id,
+  };
+  await masjidServices.addFavorite(data);
+  res.status(200).json({
+    status: httpStatus.SUCCESS,
+    message: "Favorite added successfully",
+  });
+});
+
+exports.deleteFavorite = catchAsync(async (req, res, next) => {
+  const data = {
+    user_id: req.curUser.id,
+    masjid_id: req.params.masjid_id,
+  };
+  await masjidServices.deleteFavorite(data);
+  res.status(200).json({
+    status: httpStatus.SUCCESS,
+    message: "Favorite deleted successfully",
+  });
+});

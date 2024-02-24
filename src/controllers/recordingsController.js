@@ -4,11 +4,14 @@ const stream = require("stream");
 const recordingsServices = require("./../services/recordingsServices");
 const catchAsync = require("./../utils/catchAsync");
 const httpStatus = require("./../utils/httpStatus");
+const logger = require("./../config/logger");
 const { generatePath } = require("./../utils/filePathUtils");
 
 exports.addRecordings = catchAsync(async (req, res, next) => {
   const recording = await recordingsServices.addRecording(req.body);
-  //   TODO: add logger
+  logger.info(
+    `${req.curUser.user_type} with ID ${req.curUser.id} added recording ${recording.title} with ID ${recording.id}`
+  );
   res.status(201).json({
     status: httpStatus.SUCCESS,
     data: {
@@ -19,7 +22,9 @@ exports.addRecordings = catchAsync(async (req, res, next) => {
 
 exports.deleteRecording = catchAsync(async (req, res, next) => {
   await recordingsServices.deleteRecording(req.params.recording_id);
-  //   TODO: add logger
+  logger.info(
+    `${req.curUser.user_type} with ID ${req.curUser.id} deleted recording with ID ${req.params.recording_id}`
+  );
   res.status(200).json({
     status: httpStatus.SUCCESS,
     message: "Recording deleted successfully",
@@ -103,4 +108,42 @@ exports.downloadRecording = catchAsync(async (req, res, next) => {
   });
   const audioStream = fs.createReadStream(audio_path);
   audioStream.pipe(res);
+});
+
+exports.getFavorite = catchAsync(async (req, res, next) => {
+  const config = {
+    page: req.query.page,
+    limit: req.query.limit,
+    user_id: req.curUser.id,
+  };
+
+  const recordings = await recordingsServices.getFavorite(config);
+  res.status(200).json({
+    status: httpStatus.SUCCESS,
+    data: { recordings },
+  });
+});
+
+exports.addFavorite = catchAsync(async (req, res, next) => {
+  const data = {
+    user_id: req.curUser.id,
+    recording_id: req.body.recording_id,
+  };
+  await recordingsServices.addFavorite(data);
+  res.status(200).json({
+    status: httpStatus.SUCCESS,
+    message: "Favorite added successfully",
+  });
+});
+
+exports.deleteFavorite = catchAsync(async (req, res, next) => {
+  const data = {
+    user_id: req.curUser.id,
+    recording_id: req.params.recording_id,
+  };
+  await recordingsServices.deleteFavorite(data);
+  res.status(200).json({
+    status: httpStatus.SUCCESS,
+    message: "Favorite deleted successfully",
+  });
 });

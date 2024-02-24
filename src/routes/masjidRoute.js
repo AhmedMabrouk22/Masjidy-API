@@ -6,6 +6,9 @@ const {
   getMasjid,
   getAllMasjids,
   updateMasjid,
+  getFavorite,
+  addFavorite,
+  deleteFavorite,
 } = require("./../controllers/masjidController");
 const masjidValidators = require("./../validators/masjidValidators");
 const uploadImage = require("./../middlewares/uploadImageMiddleware");
@@ -30,6 +33,20 @@ router
     addMasjid
   )
   .get(getAllMasjids);
+
+router
+  .route("/favorite")
+  .get(protect, restrictTo("user"), getFavorite)
+  .post(protect, restrictTo("user"), masjidValidators.addFav, addFavorite);
+
+router
+  .route("/favorite/:masjid_id")
+  .delete(
+    protect,
+    restrictTo("user"),
+    masjidValidators.masjidID,
+    deleteFavorite
+  );
 
 router
   .route("/:masjid_id")

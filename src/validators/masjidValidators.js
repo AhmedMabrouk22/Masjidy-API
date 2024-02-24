@@ -139,3 +139,12 @@ exports.updateMasjid = [
   // Todo: add state,city,district,street
   validatorMiddleware,
 ];
+
+exports.addFav = [
+  body("masjid_id")
+    .notEmpty()
+    .withMessage("masjid_id is required")
+    .isInt()
+    .withMessage("Invalid masjid_id"),
+  validatorMiddleware,
+];

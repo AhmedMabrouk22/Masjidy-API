@@ -254,6 +254,12 @@ Recordings.hasMany(RecordingFavorite, {
   onUpdate: "CASCADE",
 });
 
+RecordingFavorite.belongsTo(Recordings, {
+  foreignKey: "recording_id",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+
 Masjid.hasMany(MasjidFavorite, {
   foreignKey: "masjid_id",
   onDelete: "CASCADE",

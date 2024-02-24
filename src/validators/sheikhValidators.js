@@ -42,3 +42,12 @@ exports.sheikhId = [
     .withMessage("Invalid sheikh_id"),
   validatorMiddleware,
 ];
+
+exports.addFav = [
+  body("sheikh_id")
+    .notEmpty()
+    .withMessage("sheikh_id is required")
+    .isInt()
+    .withMessage("Invalid sheikh_id"),
+  validatorMiddleware,
+];

@@ -35,3 +35,12 @@ exports.getRecordings = [
     .withMessage("Invalid type"),
   validatorMiddleware,
 ];
+
+exports.addFav = [
+  body("recording_id")
+    .notEmpty()
+    .withMessage("recording_id is required")
+    .isInt()
+    .withMessage("Invalid recording_id"),
+  validatorMiddleware,
+];

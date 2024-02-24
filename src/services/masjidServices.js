@@ -1,4 +1,4 @@
-const { Op } = require("sequelize");
+const { Op, where } = require("sequelize");
 
 const sequelize = require("./../config/db");
 const {
@@ -6,6 +6,7 @@ const {
   MasjidFeatures,
   MasjidImages,
   Sheikh,
+  MasjidFavorite,
 } = require("./../models/index");
 const geomPoint = require("./../utils/geomPoint");
 const filesUtils = require("./../utils/filesUtils");
@@ -269,6 +270,64 @@ exports.deleteMasjid = async (masjid_id) => {
       throw new AppError(404, "Masjid not found", true);
     }
     await masjid.destroy();
+  } catch (error) {
+    throw error;
+  }
+};
+
+exports.getFavorite = async (config) => {
+  try {
+    if (!config.user_id) {
+      throw new AppError(400, "User ID is required", true);
+    }
+
+    const page = config.page || 1;
+    const limit = config.limit || 10;
+    const skip = (page - 1) * limit;
+    const user_id = config.user_id;
+
+    const fav = await MasjidFavorite.findAll({
+      offset: skip,
+      limit: limit,
+      where: { user_id: user_id },
+      attributes: {
+        exclude: ["masjid_id", "user_id"],
+      },
+      include: [
+        {
+          model: Masjid,
+          attributes: ["id", "name"],
+        },
+      ],
+    });
+    return fav;
+  } catch (error) {
+    throw error;
+  }
+};
+
+exports.addFavorite = async (data) => {
+  try {
+    if (!data.user_id || !data.masjid_id) {
+      throw new AppError(400, "User ID and Masjid ID are required", true);
+    }
+    await MasjidFavorite.create(data);
+  } catch (error) {
+    throw error;
+  }
+};
+
+exports.deleteFavorite = async (data) => {
+  try {
+    if (!data.user_id || !data.masjid_id) {
+      throw new AppError(400, "User ID and Masjid ID are required", true);
+    }
+    await MasjidFavorite.destroy({
+      where: {
+        user_id: data.user_id,
+        masjid_id: data.masjid_id,
+      },
+    });
   } catch (error) {
     throw error;
   }

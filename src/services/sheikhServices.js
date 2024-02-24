@@ -3,6 +3,7 @@ const {
   SheikhFeatures,
   SheikhPhoneNumbers,
   Masjid,
+  SheikhFavorite,
 } = require("./../models/index");
 const buildObject = require("./../utils/buildObj");
 const fileUtils = require("./../utils/filesUtils");
@@ -83,7 +84,6 @@ exports.getSheikh = async (sheikh_id) => {
   }
 };
 
-// Todo: Update sheikh
 exports.updateSheikh = async (sheikh) => {
   try {
     const sheikhObj = buildObject(sheikh, Sheikh.getAttributes());
@@ -138,6 +138,63 @@ exports.deleteSheikh = async (sheikh_id) => {
       throw new AppError(404, "Sheikh not found", true);
     }
     await sheikh.destroy();
+  } catch (error) {
+    throw error;
+  }
+};
+
+exports.getFavorite = async (config) => {
+  try {
+    if (!config.user_id) {
+      throw new AppError(400, "User ID is required", true);
+    }
+
+    const page = config.page || 1;
+    const limit = config.limit || 10;
+    const skip = (page - 1) * limit;
+    const user_id = config.user_id;
+    const fav = await SheikhFavorite.findAll({
+      where: { user_id },
+      offset: skip,
+      limit: limit,
+      attributes: {
+        exclude: ["sheikh_id", "user_id"],
+      },
+      include: [
+        {
+          model: Sheikh,
+          attributes: ["id", "name", "image_path"],
+        },
+      ],
+    });
+    return fav;
+  } catch (error) {
+    throw error;
+  }
+};
+
+exports.addFavorite = async (data) => {
+  try {
+    if (!data.user_id || !data.sheikh_id) {
+      throw new AppError(400, "User ID and Sheikh ID are required", true);
+    }
+    await SheikhFavorite.create(data);
+  } catch (error) {
+    throw error;
+  }
+};
+
+exports.deleteFavorite = async (data) => {
+  try {
+    if (!data.user_id || !data.sheikh_id) {
+      throw new AppError(400, "User ID and Sheikh ID are required", true);
+    }
+    await SheikhFavorite.destroy({
+      where: {
+        user_id: data.user_id,
+        sheikh_id: data.sheikh_id,
+      },
+    });
   } catch (error) {
     throw error;
   }

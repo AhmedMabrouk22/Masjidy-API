@@ -66,3 +66,40 @@ exports.updateSheikh = catchAsync(async (req, res, next) => {
     },
   });
 });
+
+exports.getFavorite = catchAsync(async (req, res, next) => {
+  const config = {
+    page: req.query.page,
+    limit: req.query.limit,
+    user_id: req.curUser.id,
+  };
+  const sheikhs = await sheikhServices.getFavorite(config);
+  res.status(200).json({
+    status: httpStatus.SUCCESS,
+    data: { sheikhs },
+  });
+});
+
+exports.addFavorite = catchAsync(async (req, res, next) => {
+  const data = {
+    user_id: req.curUser.id,
+    sheikh_id: req.body.sheikh_id,
+  };
+  await sheikhServices.addFavorite(data);
+  res.status(200).json({
+    status: httpStatus.SUCCESS,
+    message: "Favorite added successfully",
+  });
+});
+
+exports.deleteFavorite = catchAsync(async (req, res, next) => {
+  const data = {
+    user_id: req.curUser.id,
+    sheikh_id: req.params.sheikh_id,
+  };
+  await sheikhServices.deleteFavorite(data);
+  res.status(200).json({
+    status: httpStatus.SUCCESS,
+    message: "Favorite deleted successfully",
+  });
+});

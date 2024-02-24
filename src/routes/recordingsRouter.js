@@ -6,6 +6,9 @@ const {
   getRecordings,
   getRecording,
   downloadRecording,
+  getFavorite,
+  addFavorite,
+  deleteFavorite,
 } = require("./../controllers/recordingsController");
 const { uploadAudio } = require("./../middlewares/uploadAudioMiddleware");
 const { protect, restrictTo } = require("./../middlewares/authmiddleware");
@@ -25,6 +28,20 @@ router
     addRecordings
   )
   .get(recordingsValidator.getRecordings, getRecordings);
+
+router
+  .route("/favorite")
+  .get(protect, restrictTo("user"), getFavorite)
+  .post(protect, restrictTo("user"), recordingsValidator.addFav, addFavorite);
+
+router
+  .route("/favorite/:recording_id")
+  .delete(
+    protect,
+    restrictTo("user"),
+    recordingsValidator.recordingID,
+    deleteFavorite
+  );
 
 router
   .route("/:recording_id")
