@@ -15,6 +15,11 @@ const MasjidReviews = require("./masjidReviewsModels");
 const Lesson = require("./lessonModel");
 const LessonTime = require("./lessonTimeModel");
 const Recordings = require("./recordingsModel");
+const {
+  SheikhFavorite,
+  MasjidFavorite,
+  RecordingFavorite,
+} = require("./favoriteListModel");
 
 // relationships
 
@@ -24,7 +29,38 @@ User.hasOne(User_Auth, {
   onDelete: "CASCADE",
   onUpdate: "CASCADE",
 });
+
+User_Auth.belongsTo(User, {
+  foreignKey: "user_id",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+
 User.hasMany(RefreshToken, {
+  foreignKey: "user_id",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+
+RefreshToken.belongsTo(User, {
+  foreignKey: "user_id",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+
+User.hasMany(MasjidFavorite, {
+  foreignKey: "user_id",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+
+User.hasMany(SheikhFavorite, {
+  foreignKey: "user_id",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+
+User.hasMany(RecordingFavorite, {
   foreignKey: "user_id",
   onDelete: "CASCADE",
   onUpdate: "CASCADE",
@@ -44,18 +80,6 @@ User.belongsTo(City, {
 
 User.belongsTo(District, {
   foreignKey: "district_id",
-  onDelete: "CASCADE",
-  onUpdate: "CASCADE",
-});
-
-RefreshToken.belongsTo(User, {
-  foreignKey: "user_id",
-  onDelete: "CASCADE",
-  onUpdate: "CASCADE",
-});
-
-User_Auth.belongsTo(User, {
-  foreignKey: "user_id",
   onDelete: "CASCADE",
   onUpdate: "CASCADE",
 });
@@ -117,19 +141,25 @@ Masjid.hasMany(Sheikh, {
   onUpdate: "CASCADE",
 });
 
-Masjid.hasMany(Lesson, {
-  foreignKey: "masjid_id",
-  onDelete: "CASCADE",
-  onUpdate: "CASCADE",
-});
-
-// Sheikh
 Sheikh.belongsTo(Masjid, {
   foreignKey: "masjid_id",
   onDelete: "CASCADE",
   onUpdate: "CASCADE",
 });
 
+Masjid.hasMany(Lesson, {
+  foreignKey: "masjid_id",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+
+Lesson.belongsTo(Masjid, {
+  foreignKey: "masjid_id",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+
+// Sheikh
 Sheikh.hasOne(SheikhFeatures, {
   foreignKey: "sheikh_id",
   onDelete: "CASCADE",
@@ -160,6 +190,13 @@ Sheikh.hasMany(Lesson, {
   onUpdate: "CASCADE",
 });
 
+Lesson.belongsTo(Sheikh, {
+  foreignKey: "sheikh_id",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+
+// Recordings
 Sheikh.hasMany(Recordings, {
   foreignKey: "sheikh_id",
   onDelete: "CASCADE",
@@ -210,13 +247,32 @@ LessonTime.belongsTo(Lesson, {
   onUpdate: "CASCADE",
 });
 
-Lesson.belongsTo(Masjid, {
+// Favorite
+Recordings.hasMany(RecordingFavorite, {
+  foreignKey: "recording_id",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+
+Masjid.hasMany(MasjidFavorite, {
   foreignKey: "masjid_id",
   onDelete: "CASCADE",
   onUpdate: "CASCADE",
 });
 
-Lesson.belongsTo(Sheikh, {
+MasjidFavorite.belongsTo(Masjid, {
+  foreignKey: "masjid_id",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+
+Sheikh.hasMany(SheikhFavorite, {
+  foreignKey: "sheikh_id",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+
+SheikhFavorite.belongsTo(Sheikh, {
   foreignKey: "sheikh_id",
   onDelete: "CASCADE",
   onUpdate: "CASCADE",
@@ -243,4 +299,7 @@ module.exports = {
   Lesson,
   LessonTime,
   Recordings,
+  SheikhFavorite,
+  MasjidFavorite,
+  RecordingFavorite,
 };
