@@ -6,6 +6,7 @@ const {
   forgetPassword,
   verifyResetCode,
   resetPassword,
+  refreshToken,
 } = require("../controllers/authController");
 const userValidators = require("./../validators/userValidators");
 const { protect } = require("./../middlewares/authmiddleware");
@@ -26,6 +27,8 @@ router
 router
   .route("/resetPassword")
   .post(userValidators.checkEmail, userValidators.checkPassword, resetPassword);
+
+router.route("/refreshToken").post(refreshToken);
 router.get("/me", protect);
 
 module.exports = router;

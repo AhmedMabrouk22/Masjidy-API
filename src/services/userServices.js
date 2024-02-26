@@ -257,3 +257,39 @@ exports.resetPassword = async (email, password) => {
     throw error;
   }
 };
+
+exports.refreshToken = async (refresh_token, email) => {
+  try {
+    const user = await User.findOne({ where: { email } });
+    if (!user) {
+      throw new AppError(404, "User not found", true);
+    }
+    const user_id = user.dataValues.id;
+    const refreshToken = await RefreshToken.findOne({
+      where: { token: refresh_token, user_id: user_id },
+    });
+    if (!refreshToken) {
+      throw new AppError(400, "Invalid refresh token", true);
+    }
+
+    // delete refresh token
+    await refreshToken.destroy();
+
+    // generate access and refresh token
+    const access_token = authUtils.generateAccessToken({ id: user_id });
+    const newRefreshToken = authUtils.generateRefreshToken({
+      id: user_id,
+    });
+
+    // add new refresh token
+    const token = authUtils.createRefreshToken(user_id, newRefreshToken);
+    await RefreshToken.create(token);
+
+    return {
+      access_token,
+      refresh_token: newRefreshToken,
+    };
+  } catch (error) {
+    throw error;
+  }
+};

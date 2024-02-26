@@ -58,3 +58,15 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
     refresh_token: user.refresh_token,
   });
 });
+
+exports.refreshToken = catchAsync(async (req, res, next) => {
+  const { refresh_token, email } = req.body;
+  const user = await userServices.refreshToken(refresh_token, email);
+  res.status(200).json({
+    status: httpStatus.SUCCESS,
+    data: {
+      access_token: user.access_token,
+      refresh_token: user.refresh_token,
+    },
+  });
+});
