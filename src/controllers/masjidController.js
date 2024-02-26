@@ -3,8 +3,6 @@ const catchAsync = require("./../utils/catchAsync");
 const httpStatus = require("./../utils/httpStatus");
 const logger = require("./../config/logger");
 
-const { protect } = require("./../middlewares/authmiddleware");
-
 exports.addMasjid = catchAsync(async (req, res, next) => {
   const masjid = await masjidServices.addMasjid(req.body);
   logger.info(

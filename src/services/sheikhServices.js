@@ -9,10 +9,12 @@ const {
   Masjid,
   SheikhFavorite,
   SearchHistory,
+  Notifications,
 } = require("./../models/index");
 const buildObject = require("./../utils/buildObj");
 const fileUtils = require("./../utils/filesUtils");
 const AppError = require("./../config/error");
+const { getIO } = require("./../config/socket");
 
 exports.addSheikh = async (sheikh) => {
   try {
@@ -33,6 +35,14 @@ exports.addSheikh = async (sheikh) => {
         include: [SheikhFeatures, SheikhPhoneNumbers],
       }
     );
+
+    // save sheikh to notifications
+    await Notifications.create({
+      sheikh_id: newSheikh.id,
+    });
+
+    getIO().emit("addMasjidAndNotifications", "New Sheikh added");
+
     return newSheikh;
   } catch (error) {
     if (sheikh.image) {

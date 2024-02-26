@@ -9,11 +9,13 @@ const {
   Sheikh,
   MasjidFavorite,
   SearchHistory,
+  Notifications,
 } = require("./../models/index");
 const geomPoint = require("./../utils/geomPoint");
 const filesUtils = require("./../utils/filesUtils");
 const AppError = require("./../config/error");
 const buildObj = require("./../utils/buildObj");
+const { getIO } = require("./../config/socket");
 
 function buildMasjidObject(data) {
   let masjidObject = {};
@@ -82,6 +84,13 @@ exports.addMasjid = async (masjid) => {
         include: [MasjidFeatures, MasjidImages],
       }
     );
+
+    // save masjid to notifications
+    await Notifications.create({
+      masjid_id: newMasjid.id,
+    });
+
+    getIO().emit("addMasjidAndNotifications", "New Masjid added");
     return newMasjid;
   } catch (error) {
     if (masjid.images) {
