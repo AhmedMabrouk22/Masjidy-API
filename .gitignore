@@ -4,6 +4,7 @@ undefined/
 .vscode/
 uploads/
 dev_data/
+dump.rdb
 .env
 dbErd.drawio
 Schema.drawio

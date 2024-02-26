@@ -9,6 +9,8 @@ const {
   getFavorite,
   addFavorite,
   deleteFavorite,
+  getSearchHistory,
+  getMostSearch,
 } = require("./../controllers/sheikhControllers");
 const sheikhValidators = require("./../validators/sheikhValidators");
 const uploadImage = require("./../middlewares/uploadImageMiddleware");
@@ -29,6 +31,16 @@ router
     addSheikh
   )
   .get(getAllSheikhs);
+
+// search
+router
+  .route("/search-history")
+  .get(protect, restrictTo("user"), getSearchHistory);
+
+router.route("/most-search").get(getMostSearch);
+router
+  .route("/search/:sheikh_id")
+  .get(protect, restrictTo("user"), sheikhValidators.sheikhId, getSheikh);
 
 router
   .route("/favorite")

@@ -48,7 +48,15 @@ exports.getAllSheikhs = catchAsync(async (req, res, next) => {
 });
 
 exports.getSheikh = catchAsync(async (req, res, next) => {
-  const sheikh = await sheikhServices.getSheikh(req.params.sheikh_id);
+  let config = {};
+  config.sheikh_id = req.params.sheikh_id;
+
+  if (req.url.startsWith("/search")) {
+    config.search = true;
+    config.user_id = req.curUser.id;
+  }
+
+  const sheikh = await sheikhServices.getSheikh(config);
   res.status(200).json({
     status: httpStatus.SUCCESS,
     data: {
@@ -106,5 +114,24 @@ exports.deleteFavorite = catchAsync(async (req, res, next) => {
   res.status(200).json({
     status: httpStatus.SUCCESS,
     message: "Favorite deleted successfully",
+  });
+});
+
+exports.getSearchHistory = catchAsync(async (req, res, next) => {
+  const config = {
+    user_id: req.curUser.id,
+  };
+  const history = await sheikhServices.getSearchHistory(config);
+  res.status(200).json({
+    status: httpStatus.SUCCESS,
+    data: { history },
+  });
+});
+
+exports.getMostSearch = catchAsync(async (req, res, next) => {
+  const history = await sheikhServices.getMostSearch();
+  res.status(200).json({
+    status: httpStatus.SUCCESS,
+    data: { history },
   });
 });

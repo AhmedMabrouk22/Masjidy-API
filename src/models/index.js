@@ -15,6 +15,7 @@ const MasjidReviews = require("./masjidReviewsModels");
 const Lesson = require("./lessonModel");
 const LessonTime = require("./lessonTimeModel");
 const Recordings = require("./recordingsModel");
+const SearchHistory = require("./searchHistoryModel");
 const {
   SheikhFavorite,
   MasjidFavorite,
@@ -284,6 +285,31 @@ SheikhFavorite.belongsTo(Sheikh, {
   onUpdate: "CASCADE",
 });
 
+// History
+SearchHistory.belongsTo(User, {
+  foreignKey: "user_id",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+
+SearchHistory.belongsTo(Masjid, {
+  foreignKey: "masjid_id",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+
+Masjid.hasMany(SearchHistory, {
+  foreignKey: "masjid_id",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+
+SearchHistory.belongsTo(Sheikh, {
+  foreignKey: "sheikh_id",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+
 if (process.env.NODE_ENV !== "test") {
   sequelize.sync({ force: false, alter: true });
 }
@@ -308,4 +334,5 @@ module.exports = {
   SheikhFavorite,
   MasjidFavorite,
   RecordingFavorite,
+  SearchHistory,
 };

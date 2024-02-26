@@ -1,11 +1,14 @@
 const { Op } = require("sequelize");
 
+const redisClient = require("./../config/redis");
+const sequelize = require("./../config/db");
 const {
   Sheikh,
   SheikhFeatures,
   SheikhPhoneNumbers,
   Masjid,
   SheikhFavorite,
+  SearchHistory,
 } = require("./../models/index");
 const buildObject = require("./../utils/buildObj");
 const fileUtils = require("./../utils/filesUtils");
@@ -78,8 +81,9 @@ exports.getAllSheikhs = async (config) => {
   }
 };
 
-exports.getSheikh = async (sheikh_id) => {
+exports.getSheikh = async (config) => {
   try {
+    const { sheikh_id } = config;
     const sheikh = await Sheikh.findOne({
       where: { id: sheikh_id },
       include: [
@@ -103,6 +107,27 @@ exports.getSheikh = async (sheikh_id) => {
     });
     if (!sheikh) {
       throw new AppError(404, "Sheikh not found", true);
+    }
+
+    // save sheikh in history
+    if (config.search === true) {
+      await SearchHistory.create({
+        user_id: config.user_id,
+        sheikh_id: sheikh_id,
+      });
+
+      // get sheikh with id and name
+      const sheikh = await Sheikh.findOne({
+        where: { id: sheikh_id },
+        attributes: ["id", "name"],
+      });
+
+      const key = `${config.user_id} - Sheikh`;
+      const obj = JSON.stringify({
+        id: sheikh_id,
+        name: sheikh.dataValues.name,
+      });
+      await redisClient.sAdd(key, obj);
     }
     return sheikh;
   } catch (error) {
@@ -221,6 +246,80 @@ exports.deleteFavorite = async (data) => {
         sheikh_id: data.sheikh_id,
       },
     });
+  } catch (error) {
+    throw error;
+  }
+};
+
+exports.getSearchHistory = async (config) => {
+  try {
+    if (!config.user_id) {
+      throw new AppError(400, "User ID is required", true);
+    }
+
+    // cheek if user_id is exist in redis and return data
+    const key = `${config.user_id} - Sheikh`;
+    const values = await redisClient.sMembers(key);
+    const data = [];
+    if (values.length > 0) {
+      // loop through values and pare each value to json
+      for (const val of values) {
+        const obj = JSON.parse(val);
+        data.push(obj);
+      }
+      return data;
+    }
+
+    // get distinct sheikh_id form search history
+    const history = await SearchHistory.findAll({
+      attributes: [
+        [sequelize.fn("DISTINCT", sequelize.col("sheikh_id")), "sheikh_id"],
+      ],
+      where: { user_id: config.user_id },
+      group: ["sheikh_id"],
+    });
+
+    // get name and id for each sheikh in history
+    const sheikhs = await Sheikh.findAll({
+      where: { id: history.map((h) => h.sheikh_id) },
+      attributes: ["id", "name"],
+    });
+
+    // save data in redis
+    for (const sheikh of sheikhs) {
+      const elm = JSON.stringify({
+        id: sheikh.dataValues.id,
+        name: sheikh.dataValues.name,
+      });
+      await redisClient.sAdd(key, elm);
+    }
+
+    return sheikhs;
+  } catch (error) {
+    throw error;
+  }
+};
+
+exports.getMostSearch = async () => {
+  try {
+    // get top 5 most searched sheikhs in search history
+    const history = await SearchHistory.findAll({
+      attributes: [
+        "sheikh_id",
+        [sequelize.fn("COUNT", sequelize.col("sheikh_id")), "sheikh_count"],
+      ],
+      group: ["sheikh_id"],
+      order: [[sequelize.literal("sheikh_count"), "DESC"]],
+      limit: 5,
+    });
+
+    // get name and id for each sheikh in history
+    const sheikhs = await Masjid.findAll({
+      where: { id: history.map((h) => h.sheikh_id) },
+      attributes: ["id", "name"],
+    });
+
+    return sheikhs;
   } catch (error) {
     throw error;
   }

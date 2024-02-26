@@ -9,6 +9,8 @@ const {
   getFavorite,
   addFavorite,
   deleteFavorite,
+  getSearchHistory,
+  getMostSearch,
 } = require("./../controllers/masjidController");
 const masjidValidators = require("./../validators/masjidValidators");
 const uploadImage = require("./../middlewares/uploadImageMiddleware");
@@ -22,6 +24,7 @@ router.use(
   masjidValidators.masjidID,
   masjidReviewRouter
 );
+
 router
   .route("/")
   .post(
@@ -35,6 +38,9 @@ router
   .get(getAllMasjids);
 
 router
+  .route("/search-history")
+  .get(protect, restrictTo("user"), getSearchHistory);
+router
   .route("/favorite")
   .get(protect, restrictTo("user"), getFavorite)
   .post(protect, restrictTo("user"), masjidValidators.addFav, addFavorite);
@@ -47,6 +53,11 @@ router
     masjidValidators.masjidID,
     deleteFavorite
   );
+
+router.route("/most-search").get(getMostSearch);
+router
+  .route("/search/:masjid_id")
+  .get(protect, restrictTo("user"), masjidValidators.masjidID, getMasjid);
 
 router
   .route("/:masjid_id")

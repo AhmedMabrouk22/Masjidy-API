@@ -1,5 +1,6 @@
 const { Op, where } = require("sequelize");
 
+const redisClient = require("./../config/redis");
 const sequelize = require("./../config/db");
 const {
   Masjid,
@@ -7,6 +8,7 @@ const {
   MasjidImages,
   Sheikh,
   MasjidFavorite,
+  SearchHistory,
 } = require("./../models/index");
 const geomPoint = require("./../utils/geomPoint");
 const filesUtils = require("./../utils/filesUtils");
@@ -141,13 +143,14 @@ exports.getAllMasjids = async (config) => {
 };
 
 /**
- * Retrieves a specific masjid by its ID along with its features and images.
+ * Retrieves a masjid based on the provided configuration.
  *
- * @param {number} masjid_id - The ID of the masjid to retrieve
- * @return {object} The masjid object with its features and images
+ * @param {Object} config - The configuration object containing masjid_id and search flag.
+ * @return {Promise<Object>} A promise that resolves with the retrieved masjid.
  */
-exports.getMasjid = async (masjid_id) => {
+exports.getMasjid = async (config) => {
   try {
+    const { masjid_id } = config;
     let masjid = await Masjid.findOne({
       where: { id: masjid_id },
       include: [
@@ -171,6 +174,28 @@ exports.getMasjid = async (masjid_id) => {
     if (!masjid) {
       throw new AppError(404, "Masjid not found", true);
     }
+
+    // save masjid in history
+    if (config.search === true) {
+      await SearchHistory.create({
+        user_id: config.user_id,
+        masjid_id: masjid_id,
+      });
+
+      // get masjid with id and name
+      const masjid = await Masjid.findOne({
+        where: { id: masjid_id },
+        attributes: ["id", "name"],
+      });
+
+      const key = `${config.user_id} - Masjid`;
+      const obj = JSON.stringify({
+        id: masjid_id,
+        name: masjid.dataValues.name,
+      });
+      await redisClient.sAdd(key, obj);
+    }
+
     return masjid;
   } catch (error) {
     throw error;
@@ -352,6 +377,80 @@ exports.deleteFavorite = async (data) => {
         masjid_id: data.masjid_id,
       },
     });
+  } catch (error) {
+    throw error;
+  }
+};
+
+exports.getSearchHistory = async (config) => {
+  try {
+    if (!config.user_id) {
+      throw new AppError(400, "User ID is required", true);
+    }
+
+    // cheek if user_id is exist in redis and return data
+    const key = `${config.user_id} - Masjid`;
+    const values = await redisClient.sMembers(key);
+    const data = [];
+    if (values.length > 0) {
+      // loop through values and pare each value to json
+      for (const val of values) {
+        const obj = JSON.parse(val);
+        data.push(obj);
+      }
+      return data;
+    }
+
+    // get distinct masjid_id form search history
+    const history = await SearchHistory.findAll({
+      attributes: [
+        [sequelize.fn("DISTINCT", sequelize.col("masjid_id")), "masjid_id"],
+      ],
+      where: { user_id: config.user_id },
+      group: ["masjid_id"],
+    });
+
+    // get name and id for each masjid in history
+    const masjids = await Masjid.findAll({
+      where: { id: history.map((h) => h.masjid_id) },
+      attributes: ["id", "name"],
+    });
+
+    // save data in redis
+    for (const masjid of masjids) {
+      const elm = JSON.stringify({
+        id: masjid.dataValues.id,
+        name: masjid.dataValues.name,
+      });
+      await redisClient.sAdd(key, elm);
+    }
+
+    return masjids;
+  } catch (error) {
+    throw error;
+  }
+};
+
+exports.getMostSearch = async () => {
+  try {
+    // get top 5 most searched masjids in search history
+    const history = await SearchHistory.findAll({
+      attributes: [
+        "masjid_id",
+        [sequelize.fn("COUNT", sequelize.col("masjid_id")), "masjid_count"],
+      ],
+      group: ["masjid_id"],
+      order: [[sequelize.literal("masjid_count"), "DESC"]],
+      limit: 5,
+    });
+
+    // get name and id for each masjid in history
+    const masjids = await Masjid.findAll({
+      where: { id: history.map((h) => h.masjid_id) },
+      attributes: ["id", "name"],
+    });
+
+    return masjids;
   } catch (error) {
     throw error;
   }

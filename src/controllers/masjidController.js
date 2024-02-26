@@ -3,6 +3,8 @@ const catchAsync = require("./../utils/catchAsync");
 const httpStatus = require("./../utils/httpStatus");
 const logger = require("./../config/logger");
 
+const { protect } = require("./../middlewares/authmiddleware");
+
 exports.addMasjid = catchAsync(async (req, res, next) => {
   const masjid = await masjidServices.addMasjid(req.body);
   logger.info(
@@ -29,7 +31,14 @@ exports.deleteMasjid = catchAsync(async (req, res, next) => {
 });
 
 exports.getMasjid = catchAsync(async (req, res, next) => {
-  const masjid = await masjidServices.getMasjid(req.params.masjid_id);
+  let config = {};
+  config.masjid_id = req.params.masjid_id;
+  if (req.url.startsWith("/search")) {
+    config.search = true;
+    config.user_id = req.curUser.id;
+  }
+
+  const masjid = await masjidServices.getMasjid(config);
   res.status(200).json({
     status: httpStatus.SUCCESS,
     data: {
@@ -107,5 +116,24 @@ exports.deleteFavorite = catchAsync(async (req, res, next) => {
   res.status(200).json({
     status: httpStatus.SUCCESS,
     message: "Favorite deleted successfully",
+  });
+});
+
+exports.getSearchHistory = catchAsync(async (req, res, next) => {
+  const config = {
+    user_id: req.curUser.id,
+  };
+  const history = await masjidServices.getSearchHistory(config);
+  res.status(200).json({
+    status: httpStatus.SUCCESS,
+    data: { history },
+  });
+});
+
+exports.getMostSearch = catchAsync(async (req, res, next) => {
+  const history = await masjidServices.getMostSearch();
+  res.status(200).json({
+    status: httpStatus.SUCCESS,
+    data: { history },
   });
 });
