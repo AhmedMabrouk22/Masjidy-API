@@ -3,6 +3,12 @@ const buildObj = require("./../utils/buildObj");
 const fileUtils = require("./../utils/filesUtils");
 const AppError = require("./../config/error");
 
+/**
+ * Asynchronously adds a recording using the provided data.
+ *
+ * @param {Object} data - the data for the recording
+ * @return {Promise<Object>} a promise that resolves to the newly created recording
+ */
 exports.addRecording = async (data) => {
   try {
     const recordingObj = buildObj(data, Recordings.getAttributes());
@@ -16,6 +22,12 @@ exports.addRecording = async (data) => {
   }
 };
 
+/**
+ * Deletes a recording by its ID.
+ *
+ * @param {string} recording_id - The ID of the recording to be deleted
+ * @return {Promise<void>} A promise that resolves when the recording is successfully deleted
+ */
 exports.deleteRecording = async (recording_id) => {
   try {
     const recording = await Recordings.findOne({
@@ -30,6 +42,12 @@ exports.deleteRecording = async (recording_id) => {
   }
 };
 
+/**
+ * Retrieves recordings based on the provided configuration.
+ *
+ * @param {Object} config - Configuration object containing page, limit, sheikh_id, and type
+ * @return {Array} An array of recordings based on the provided configuration
+ */
 exports.getRecordings = async (config) => {
   try {
     const page = config.page * 1 || 1;
@@ -56,6 +74,12 @@ exports.getRecordings = async (config) => {
   }
 };
 
+/**
+ * Retrieves a recording by its ID.
+ *
+ * @param {string} recording_id - The ID of the recording to retrieve
+ * @return {Promise<object>} The recording object
+ */
 exports.getRecording = async (recording_id) => {
   try {
     const recording = await Recordings.findOne({
@@ -70,6 +94,12 @@ exports.getRecording = async (recording_id) => {
   }
 };
 
+/**
+ * Retrieves the favorite recordings for a user based on the provided configuration.
+ *
+ * @param {Object} config - The configuration object containing user_id, page, and limit.
+ * @return {Promise<Array>} A promise that resolves to an array of favorite recordings.
+ */
 exports.getFavorite = async (config) => {
   try {
     if (!config.user_id) {
@@ -106,6 +136,12 @@ exports.getFavorite = async (config) => {
   }
 };
 
+/**
+ * Adds a favorite recording for a user.
+ *
+ * @param {Object} data - The data object containing user_id and recording_id
+ * @return {Promise} A promise that resolves when the recording favorite is created
+ */
 exports.addFavorite = async (data) => {
   try {
     if (!data.user_id || !data.recording_id) {
@@ -117,6 +153,12 @@ exports.addFavorite = async (data) => {
   }
 };
 
+/**
+ * Asynchronously deletes a favorite recording for a user.
+ *
+ * @param {object} data - An object containing user_id and recording_id
+ * @return {Promise<void>} A promise that resolves with no value upon successful deletion
+ */
 exports.deleteFavorite = async (data) => {
   try {
     if (!data.user_id || !data.recording_id) {

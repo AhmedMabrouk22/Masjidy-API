@@ -16,6 +16,12 @@ const fileUtils = require("./../utils/filesUtils");
 const AppError = require("./../config/error");
 const { getIO } = require("./../config/socket");
 
+/**
+ * Adds a new sheikh to the database along with related features and phone numbers.
+ *
+ * @param {Object} sheikh - The sheikh object to be added
+ * @return {Promise<Object>} The newly added sheikh object
+ */
 exports.addSheikh = async (sheikh) => {
   try {
     let sheikhObj = buildObject(sheikh, Sheikh.getAttributes());
@@ -52,6 +58,12 @@ exports.addSheikh = async (sheikh) => {
   }
 };
 
+/**
+ * Retrieves a list of sheikhs based on the provided configuration.
+ *
+ * @param {Object} config - The configuration object containing page, limit, and filter
+ * @return {Promise<Array>} An array of sheikhs that match the specified criteria
+ */
 exports.getAllSheikhs = async (config) => {
   try {
     // Pagination
@@ -91,6 +103,12 @@ exports.getAllSheikhs = async (config) => {
   }
 };
 
+/**
+ * Retrieves a sheikh based on the provided configuration.
+ *
+ * @param {Object} config - The configuration object containing the sheikh_id and optional search flag.
+ * @return {Promise<Object>} The retrieved sheikh object.
+ */
 exports.getSheikh = async (config) => {
   try {
     const { sheikh_id } = config;
@@ -145,6 +163,12 @@ exports.getSheikh = async (config) => {
   }
 };
 
+/**
+ * Updates the Sheikh object in the database along with associated SheikhFeatures.
+ *
+ * @param {Object} sheikh - The Sheikh object to be updated
+ * @return {Promise} A Promise that resolves when the update is complete
+ */
 exports.updateSheikh = async (sheikh) => {
   try {
     const sheikhObj = buildObject(sheikh, Sheikh.getAttributes());
@@ -192,6 +216,12 @@ exports.updateSheikh = async (sheikh) => {
   }
 };
 
+/**
+ * Deletes the sheikh with the given ID.
+ *
+ * @param {number} sheikh_id - The ID of the sheikh to be deleted
+ * @return {Promise} A Promise that resolves after the sheikh is deleted
+ */
 exports.deleteSheikh = async (sheikh_id) => {
   try {
     const sheikh = await Sheikh.findOne({ where: { id: sheikh_id } });
@@ -204,6 +234,12 @@ exports.deleteSheikh = async (sheikh_id) => {
   }
 };
 
+/**
+ * Retrieves the favorite items for a user based on the provided configuration.
+ *
+ * @param {Object} config - The configuration object containing user_id, page, and limit.
+ * @return {Array} The array of favorite items for the user.
+ */
 exports.getFavorite = async (config) => {
   try {
     if (!config.user_id) {
@@ -234,6 +270,12 @@ exports.getFavorite = async (config) => {
   }
 };
 
+/**
+ * Asynchronous function to add a favorite sheikh for a user.
+ *
+ * @param {Object} data - An object containing user_id and sheikh_id
+ * @return {Promise} A Promise that resolves when the sheikh is added as a favorite, or rejects with an error
+ */
 exports.addFavorite = async (data) => {
   try {
     if (!data.user_id || !data.sheikh_id) {
@@ -245,6 +287,12 @@ exports.addFavorite = async (data) => {
   }
 };
 
+/**
+ * Asynchronously deletes a favorite sheikh record based on user and sheikh IDs.
+ *
+ * @param {Object} data - An object containing user_id and sheikh_id properties.
+ * @return {Promise} A Promise that resolves when the record is deleted or rejects with an error.
+ */
 exports.deleteFavorite = async (data) => {
   try {
     if (!data.user_id || !data.sheikh_id) {
@@ -261,6 +309,12 @@ exports.deleteFavorite = async (data) => {
   }
 };
 
+/**
+ * Retrieves search history for a given user and stores the data in Redis for future use.
+ *
+ * @param {Object} config - Configuration object containing the user_id
+ * @return {Promise<Array>} An array of sheikhs representing the search history
+ */
 exports.getSearchHistory = async (config) => {
   try {
     if (!config.user_id) {
@@ -310,6 +364,11 @@ exports.getSearchHistory = async (config) => {
   }
 };
 
+/**
+ * Get the top 5 most searched sheikhs in search history and return their names and ids.
+ *
+ * @return {Promise<Array>} An array of objects containing the id and name of the sheikhs.
+ */
 exports.getMostSearch = async () => {
   try {
     // get top 5 most searched sheikhs in search history

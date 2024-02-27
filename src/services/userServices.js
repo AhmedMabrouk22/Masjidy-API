@@ -258,6 +258,13 @@ exports.resetPassword = async (email, password) => {
   }
 };
 
+/**
+ * Refreshes the access and refresh token using the provided refresh token and email.
+ *
+ * @param {string} refresh_token - The refresh token used to refresh the access and refresh token
+ * @param {string} email - The email of the user
+ * @return {object} An object containing the new access token and refresh token
+ */
 exports.refreshToken = async (refresh_token, email) => {
   try {
     const user = await User.findOne({ where: { email } });

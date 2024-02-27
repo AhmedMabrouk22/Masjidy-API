@@ -17,6 +17,12 @@ const AppError = require("./../config/error");
 const buildObj = require("./../utils/buildObj");
 const { getIO } = require("./../config/socket");
 
+/**
+ * Builds a masjid object based on the provided data, filtering out non-attribute keys and adding geom point if longitude and latitude are present.
+ *
+ * @param {Object} data - the data to build the masjid object from
+ * @return {Object} the masjid object built from the provided data
+ */
 function buildMasjidObject(data) {
   let masjidObject = {};
   for (const [key, value] of Object.entries(data)) {
@@ -32,6 +38,12 @@ function buildMasjidObject(data) {
   return masjidObject;
 }
 
+/**
+ * Builds a new object containing only the attributes from the input data that are valid Masjid features.
+ *
+ * @param {Object} data - The input data object
+ * @return {Object} The new object containing valid Masjid features
+ */
 function buildMasjidFeaturesObject(data) {
   let masjidFeaturesObject = {};
   for (const [key, value] of Object.entries(data)) {
@@ -42,6 +54,12 @@ function buildMasjidFeaturesObject(data) {
   return masjidFeaturesObject;
 }
 
+/**
+ * Handles the uploading of images and returns the paths of the uploaded images.
+ *
+ * @param {array} images - An array of image paths to be uploaded
+ * @return {array} An array of objects containing the image paths
+ */
 function handleImageUploads(images) {
   const image_paths = [];
   for (let i = 0; i < images.length; i++) {
@@ -52,6 +70,13 @@ function handleImageUploads(images) {
   return image_paths;
 }
 
+/**
+ * Handles the deletion of images associated with a specific masjid.
+ *
+ * @param {number} masjid_id - The ID of the masjid
+ * @param {Array<string>} images - The array of image paths to be deleted
+ * @return {Promise<void>} A promise that resolves once the images are deleted
+ */
 async function handleImageDeletions(masjid_id, images) {
   await MasjidImages.destroy({
     where: {
@@ -100,6 +125,12 @@ exports.addMasjid = async (masjid) => {
   }
 };
 
+/**
+ * Retrieves a list of masjids based on the provided configuration.
+ *
+ * @param {Object} config - The configuration object for pagination and filtering
+ * @return {Promise<Array>} A promise that resolves to an array of masjids
+ */
 exports.getAllMasjids = async (config) => {
   try {
     // Pagination
@@ -333,6 +364,12 @@ exports.deleteMasjid = async (masjid_id) => {
   }
 };
 
+/**
+ * Retrieves the favorite masjids for a given user based on the provided configuration.
+ *
+ * @param {Object} config - The configuration object containing user_id, page, and limit.
+ * @return {Promise<Array>} The array of favorite masjids.
+ */
 exports.getFavorite = async (config) => {
   try {
     if (!config.user_id) {
@@ -364,6 +401,12 @@ exports.getFavorite = async (config) => {
   }
 };
 
+/**
+ * Asynchronous function to add a favorite with user and masjid IDs.
+ *
+ * @param {Object} data - The data object containing user_id and masjid_id
+ * @return {Promise} Promise that resolves when the operation is complete
+ */
 exports.addFavorite = async (data) => {
   try {
     if (!data.user_id || !data.masjid_id) {
@@ -375,6 +418,12 @@ exports.addFavorite = async (data) => {
   }
 };
 
+/**
+ * Asynchronously deletes a favorite based on user and masjid ID.
+ *
+ * @param {Object} data - an object containing user_id and masjid_id
+ * @return {Promise} a promise representing the completion of the deletion
+ */
 exports.deleteFavorite = async (data) => {
   try {
     if (!data.user_id || !data.masjid_id) {
@@ -391,6 +440,12 @@ exports.deleteFavorite = async (data) => {
   }
 };
 
+/**
+ * Retrieves the search history data for a given user, stores it in Redis, and returns the masjids associated with the search history.
+ *
+ * @param {object} config - The configuration object containing the user_id.
+ * @return {Promise<Array>} An array containing the masjids associated with the search history.
+ */
 exports.getSearchHistory = async (config) => {
   try {
     if (!config.user_id) {
@@ -440,6 +495,12 @@ exports.getSearchHistory = async (config) => {
   }
 };
 
+/**
+ * Retrieves the top 5 most searched masjids in the search history and returns their names and ids.
+ *
+ * @param {void}
+ * @return {Promise<Array>} An array of masjids with their names and ids
+ */
 exports.getMostSearch = async () => {
   try {
     // get top 5 most searched masjids in search history

@@ -3,6 +3,12 @@ const { Lesson, LessonTime, Masjid, Sheikh } = require("./../models/index");
 const buildObj = require("./../utils/buildObj");
 const AppError = require("./../config/error");
 
+/**
+ * Creates a new lesson.
+ *
+ * @param {Object} lesson - The lesson object to be created
+ * @return {Promise} The newly created lesson
+ */
 exports.createLesson = async (lesson) => {
   try {
     const lessonObj = buildObj(lesson, Lesson.getAttributes());
@@ -22,6 +28,12 @@ exports.createLesson = async (lesson) => {
   }
 };
 
+/**
+ * Retrieves lessons based on the provided configuration.
+ *
+ * @param {Object} config - The configuration object containing page, limit, masjid_id, sheikh_id, and day.
+ * @return {Array} An array of lessons that match the provided configuration.
+ */
 exports.getAllLessons = async (config) => {
   try {
     const page = config.page * 1 || 1;
@@ -68,6 +80,12 @@ exports.getAllLessons = async (config) => {
   }
 };
 
+/**
+ * Retrieves a lesson by its ID, along with associated lesson time, masjid, and sheikh information.
+ *
+ * @param {number} lesson_id - The ID of the lesson to retrieve
+ * @return {object} The retrieved lesson object
+ */
 exports.getLesson = async (lesson_id) => {
   try {
     const lesson = await Lesson.findOne({
@@ -101,6 +119,12 @@ exports.getLesson = async (lesson_id) => {
   }
 };
 
+/**
+ * Delete a lesson by its ID.
+ *
+ * @param {number} lesson_id - The ID of the lesson to be deleted
+ * @return {Promise} A Promise that resolves when the lesson is deleted
+ */
 exports.deleteLesson = async (lesson_id) => {
   try {
     const lesson = await Lesson.findOne({ where: { id: lesson_id } });
@@ -113,6 +137,12 @@ exports.deleteLesson = async (lesson_id) => {
   }
 };
 
+/**
+ * Update a lesson in the database.
+ *
+ * @param {Object} lesson - The lesson object to be updated
+ * @return {Promise} A promise that resolves once the lesson is updated
+ */
 exports.updateLesson = async (lesson) => {
   try {
     const lessonObj = buildObj(lesson, Lesson.getAttributes());
