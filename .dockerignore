@@ -1,0 +1,10 @@
+node_modules/
+logs/
+__tests__/
+.vscode/
+uploads/
+dev_data/
+dump.rdb
+dbErd.drawio
+Schema.drawio
+ERD.png

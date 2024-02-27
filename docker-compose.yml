@@ -1,0 +1,38 @@
+version: "3.7"
+
+services:
+  masjidy:
+    build: .
+    command: node server.js
+    ports:
+      - target: 3000
+        published: 3000
+    depends_on:
+      - postgresql
+      - redis
+  redis:
+    image: redis:alpine
+    ports:
+      - target: 6379
+        published: 6379
+
+  postgresql:
+    image: postgres
+    environment:
+      - POSTGRES_DB=MasjidyDB
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=admin
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  pgis:
+    image: postgis/postgis
+    environment:
+      - POSTGRES_DB=MasjidyDB
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=admin
+    depends_on:
+      - postgresql
+
+volumes:
+  postgres_data:
