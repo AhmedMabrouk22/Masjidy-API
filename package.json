@@ -4,7 +4,7 @@
   "description": "Masjidy is an application allows users to explore the Masajid, sheikhs and listen to them records.",
   "main": "server.js",
   "scripts": {
-    "test": "export NODE_ENV=test || SET \"NODE_ENV=test\" && jest",
+    "test": "export NODE_ENV=test || SET \"NODE_ENV=test\" && jest --detectOpenHandles",
     "start": "nodemon server.js",
     "start:prod": "export NODE_ENV=production || SET \"NODE_ENV=production\" && nodemon server.js"
   },

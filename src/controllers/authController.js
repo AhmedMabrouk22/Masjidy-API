@@ -54,8 +54,10 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   res.status(200).json({
     status: httpStatus.SUCCESS,
     message: "Password reset successfully",
-    access_token: user.access_token,
-    refresh_token: user.refresh_token,
+    data: {
+      access_token: user.dataValues.access_token,
+      refresh_token: user.dataValues.refresh_token,
+    },
   });
 });
 

@@ -31,6 +31,7 @@ class Logger {
     // if (process.env.NODE_ENV !== "production") {
     //   this.logger.format = winston.format.json();
     // }
+    if (process.env.NODE_ENV === "test") this.logger.silent = true;
   }
 
   log(level, message) {

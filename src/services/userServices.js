@@ -39,7 +39,6 @@ exports.createUser = async (user) => {
       await RefreshToken.create(token, { transaction: t });
 
       delete newUser.dataValues["password"];
-      logger.info(`User with ID ${newUser.dataValues.id} created.`);
       return newUser;
     });
     return result;
@@ -83,7 +82,6 @@ exports.login = async (email, password) => {
     await RefreshToken.create(token);
 
     delete user.dataValues["password"];
-    logger.info(`User with ID ${user.dataValues.id} logged in.`);
     return user;
   } catch (error) {
     throw error;
@@ -162,7 +160,6 @@ exports.forgetPassword = async (user_email) => {
       user.dataValues,
       resetCode
     );
-    logger.info(`Password reset code sent to ${user_email}.`);
   } catch (error) {
     throw error;
   }
@@ -229,6 +226,14 @@ exports.resetPassword = async (email, password) => {
       throw new AppError(404, "User not found", true);
     }
 
+    // check if user auth is verified
+    const userAuth = await User_Auth.findOne({
+      where: { user_id: user.dataValues.id, is_verified: true },
+    });
+    if (!userAuth) {
+      throw new AppError(400, "User not verified", true);
+    }
+
     // hash password
     const hashedPassword = await authUtils.hashPassword(password);
     user.password = hashedPassword;
@@ -241,16 +246,14 @@ exports.resetPassword = async (email, password) => {
     await RefreshToken.destroy({ where: { user_id: user.dataValues.id } });
 
     // generate access and refresh token
-    const access_token = authUtils.generateAccessToken({ id: newUser.id });
-    const refresh_token = authUtils.generateRefreshToken({ id: newUser.id });
+    const access_token = authUtils.generateAccessToken({ id: user.id });
+    const refresh_token = authUtils.generateRefreshToken({ id: user.id });
     user.dataValues.access_token = access_token;
     user.dataValues.refresh_token = refresh_token;
 
     // add new refresh token
     const token = authUtils.createRefreshToken(user.id, refresh_token);
     await RefreshToken.create(token);
-
-    logger.info(`Password reset for ${email}.`);
 
     return user;
   } catch (error) {

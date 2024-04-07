@@ -4,6 +4,7 @@ const app = require("./../../src/config/app");
 const sequelize = require("./../../src/config/db");
 const authUtils = require("./../../src/utils/authUtils");
 const db = require("./../../src/models/index");
+const redis = require("./../../src/config/redis");
 
 beforeAll(async () => {
   await sequelize.sync({ force: true });
@@ -180,6 +181,18 @@ describe("POST /api/v1/auth/verifyResetCode", () => {
   });
 });
 
+describe("POST /api/v1/auth/resetPassword", () => {
+  it("should reset password for the user", async () => {
+    const res = await request(app).post("/api/v1/auth/resetPassword").send({
+      email: "ahmed@test.com",
+      password: "123456789",
+    });
+    expect(res.status).toBe(200);
+    expect(res.body.message).toMatch("Password reset successful");
+  });
+});
+
 afterAll(async () => {
   await sequelize.close();
+  await redis.disconnect();
 });

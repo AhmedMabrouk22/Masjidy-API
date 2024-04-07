@@ -23,7 +23,9 @@ const server = require("http").createServer(app);
 initSocket(server);
 
 // Middleware
-app.use(morgan("dev"));
+if (process.env.NODE_ENV === "development") {
+  app.use(morgan("dev"));
+}
 app.use(express.json());
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, "../", "uploads")));
