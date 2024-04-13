@@ -303,3 +303,38 @@ exports.refreshToken = async (refresh_token, email) => {
     throw error;
   }
 };
+
+/**
+ * Deletes a user with the given user ID.
+ *
+ * @param {number} user_id - The ID of the user to be deleted
+ * @return {Promise} A promise that resolves when the user is successfully deleted, and rejects with an error if deletion fails
+ */
+exports.deleteUser = async (user_id) => {
+  try {
+    await User.destroy({ where: { id: user_id } });
+  } catch (error) {
+    throw error;
+  }
+};
+
+/**
+ * Updates the user type for a given user ID.
+ *
+ * @param {string} user_id - The ID of the user to update.
+ * @param {string} type - The new type to assign to the user.
+ * @return {Promise<void>} Promise that resolves once the user type is updated.
+ */
+exports.changeUserType = async (user_id, type) => {
+  try {
+    // check if user exists
+    const user = await User.findOne({ where: { id: user_id } });
+    if (!user) {
+      throw new AppError(404, "User not found", true);
+    }
+
+    await User.update({ user_type: type }, { where: { id: user_id } });
+  } catch (error) {
+    throw error;
+  }
+};

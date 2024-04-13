@@ -1,5 +1,6 @@
-const { body } = require("express-validator");
+const { body, param } = require("express-validator");
 const validatorMiddleware = require("./../middlewares/validatorsMiddleware");
+const AppError = require("../config/error");
 
 exports.createUserValidator = [
   body("first_name").notEmpty().withMessage("First name is required"),
@@ -14,19 +15,6 @@ exports.createUserValidator = [
     .withMessage("Password is required")
     .isLength({ min: 8 })
     .withMessage("Password must be at least 8 characters long"),
-  // body("user_type")
-  //   .optional()
-  //   .isIn(["admin", "manger", "user"])
-  //   .withMessage("Invalid user type")
-  //   .custom((value) => {
-  //     if (
-  //       (value === "admin" || value === "manager") &&
-  //       req.curUser.user_type === "admin"
-  //     ) {
-  //       return true;
-  //     }
-  //     throw new Error("You don't have permission to perform this action");
-  //   }),
   validatorMiddleware,
 ];
 
@@ -50,5 +38,34 @@ exports.checkPassword = [
     .withMessage("Password is required")
     .isLength({ min: 8 })
     .withMessage("Password must be at least 8 characters long"),
+  validatorMiddleware,
+];
+
+exports.deleteUserValidator = [
+  param("user_id").notEmpty().withMessage("User ID is required"),
+  param("user_id").custom((value, { req }) => {
+    if (value == req.curUser.id) {
+      throw new AppError(400, "You cannot delete your own account", true);
+    }
+    return true;
+  }),
+  validatorMiddleware,
+];
+
+exports.changeUserType = [
+  param("user_id").notEmpty().withMessage("User ID is required").isInt({
+    min: 1,
+  }),
+  param("user_id").custom((value, { req }) => {
+    if (value == req.curUser.id) {
+      throw new AppError(400, "You cannot change your own account type", true);
+    }
+    return true;
+  }),
+  body("user_type")
+    .notEmpty()
+    .withMessage("user type is require")
+    .isIn(["user", "admin", "manager"])
+    .withMessage("Invalid user type"),
   validatorMiddleware,
 ];
