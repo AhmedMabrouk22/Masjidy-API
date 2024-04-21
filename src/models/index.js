@@ -2,9 +2,6 @@ const sequelize = require("./../config/db");
 const User = require("./userModel");
 const User_Auth = require("./user_auth");
 const RefreshToken = require("./refreshTokenModel");
-const State = require("./stateModel");
-const City = require("./cityModel");
-const District = require("./districtModel");
 const Masjid = require("./masjidModel");
 const MasjidFeatures = require("./masjidFeatures");
 const MasjidImages = require("./masjidImagesModel");
@@ -22,6 +19,7 @@ const {
   MasjidFavorite,
   RecordingFavorite,
 } = require("./favoriteListModel");
+const logger = require("../config/logger");
 
 // relationships
 
@@ -64,50 +62,6 @@ User.hasMany(SheikhFavorite, {
 
 User.hasMany(RecordingFavorite, {
   foreignKey: "user_id",
-  onDelete: "CASCADE",
-  onUpdate: "CASCADE",
-});
-
-User.belongsTo(State, {
-  foreignKey: "state_id",
-  onDelete: "CASCADE",
-  onUpdate: "CASCADE",
-});
-
-User.belongsTo(City, {
-  foreignKey: "city_id",
-  onDelete: "CASCADE",
-  onUpdate: "CASCADE",
-});
-
-User.belongsTo(District, {
-  foreignKey: "district_id",
-  onDelete: "CASCADE",
-  onUpdate: "CASCADE",
-});
-
-// City
-City.hasMany(District, {
-  foreignKey: "city_id",
-  onDelete: "CASCADE",
-  onUpdate: "CASCADE",
-});
-
-District.belongsTo(City, {
-  foreignKey: "city_id",
-  onDelete: "CASCADE",
-  onUpdate: "CASCADE",
-});
-
-// State
-State.hasMany(City, {
-  foreignKey: "state_id",
-  onDelete: "CASCADE",
-  onUpdate: "CASCADE",
-});
-
-City.belongsTo(State, {
-  foreignKey: "state_id",
   onDelete: "CASCADE",
   onUpdate: "CASCADE",
 });
@@ -337,16 +291,20 @@ Sheikh.hasMany(Notifications, {
 });
 
 if (process.env.NODE_ENV !== "test") {
-  sequelize.sync({ force: false, alter: true });
+  sequelize
+    .sync({ force: false, alter: true })
+    .then(() => {
+      logger.info("Database synced");
+    })
+    .catch((err) => {
+      logger.error(err);
+    });
 }
 
 module.exports = {
   User,
   User_Auth,
   RefreshToken,
-  State,
-  City,
-  District,
   Masjid,
   MasjidFeatures,
   MasjidImages,

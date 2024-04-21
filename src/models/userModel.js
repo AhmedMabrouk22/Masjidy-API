@@ -45,14 +45,16 @@ const User = sequelize.define(
         isIn: [["user", "admin", "manager"]],
       },
     },
-    state_id: {
-      type: DataTypes.INTEGER,
+    state: {
+      type: DataTypes.STRING,
+      allowNull: false,
     },
-    city_id: {
-      type: DataTypes.INTEGER,
+    city: {
+      type: DataTypes.STRING,
+      allowNull: false,
     },
-    district_id: {
-      type: DataTypes.INTEGER,
+    region: {
+      type: DataTypes.STRING,
     },
   },
   {
