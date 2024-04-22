@@ -3,7 +3,7 @@ const { body, param, query } = require("express-validator");
 const validatorMiddleware = require("./../middlewares/validatorsMiddleware");
 
 exports.createLesson = [
-  body("name").notEmpty().withMessage("Name is required"),
+  body("title").notEmpty().withMessage("Name is required"),
   body("masjid_id")
     .notEmpty()
     .withMessage("Masjid id is required")

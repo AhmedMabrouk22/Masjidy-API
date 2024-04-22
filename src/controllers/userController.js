@@ -14,7 +14,11 @@ exports.getLoggedUser = catchAsync(async (req, res, next) => {
 });
 
 exports.getAllUsers = catchAsync(async (req, res, next) => {
-  const users = await userServices.getUsers();
+  let config = {
+    page: req.query.page,
+    limit: req.query.limit,
+  };
+  const users = await userServices.getUsers(config);
   res.status(200).json({
     status: httpStatus.SUCCESS,
     result: users.length,

@@ -115,10 +115,17 @@ exports.getUser = async (user_id) => {
  *
  * @return {Array} The array of users.
  */
-exports.getUsers = async () => {
+exports.getUsers = async (config) => {
   try {
+    // Pagination
+    const page = config.page * 1 || 1;
+    const limit = config.limit * 1 || 10;
+    const skip = (page - 1) * limit;
+
     const users = await User.findAll({
       attributes: { exclude: ["password"] },
+      offset: skip,
+      limit: limit,
     });
     return users;
   } catch (error) {

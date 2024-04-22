@@ -383,7 +383,7 @@ exports.getMostSearch = async () => {
     });
 
     // get name and id for each sheikh in history
-    const sheikhs = await Masjid.findAll({
+    const sheikhs = await Sheikh.findAll({
       where: { id: history.map((h) => h.sheikh_id) },
       attributes: ["id", "name"],
     });
