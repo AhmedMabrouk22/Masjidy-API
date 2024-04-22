@@ -14,8 +14,10 @@ exports.createMasjid = [
   body("capacity")
     .notEmpty()
     .withMessage("capacity is required")
-    .isInt()
-    .withMessage("capacity must be a number"),
+    .isInt({
+      min: 50,
+    })
+    .withMessage("capacity must be a positive number"),
   body("longitude")
     .notEmpty()
     .withMessage("longitude is required")
@@ -98,8 +100,10 @@ exports.updateMasjid = [
     .optional()
     .notEmpty()
     .withMessage("capacity is required")
-    .isInt()
-    .withMessage("capacity must be a number"),
+    .isInt({
+      min: 50,
+    })
+    .withMessage("capacity must be a positive number"),
   body("longitude")
     .optional()
     .notEmpty()

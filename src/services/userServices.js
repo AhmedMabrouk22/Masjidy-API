@@ -338,3 +338,20 @@ exports.changeUserType = async (user_id, type) => {
     throw error;
   }
 };
+
+exports.addAdmin = async (data) => {
+  try {
+    const userExists = await User.findOne({ where: { email: data.email } });
+    if (userExists) {
+      throw new AppError(400, "User already exists", true);
+    }
+
+    // hash password
+    const hashedPassword = await authUtils.hashPassword(data.password);
+    data.password = hashedPassword;
+
+    await User.create(data);
+  } catch (error) {
+    throw error;
+  }
+};
