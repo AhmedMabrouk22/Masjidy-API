@@ -47,11 +47,9 @@ const User = sequelize.define(
     },
     state: {
       type: DataTypes.STRING,
-      allowNull: false,
     },
     city: {
       type: DataTypes.STRING,
-      allowNull: false,
     },
     region: {
       type: DataTypes.STRING,

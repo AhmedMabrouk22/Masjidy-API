@@ -11,6 +11,8 @@ const {
   deleteFavorite,
   getSearchHistory,
   getMostSearch,
+  uploadMasjidImages,
+  deleteMasjidImages,
 } = require("./../controllers/masjidController");
 const masjidValidators = require("./../validators/masjidValidators");
 const uploadImage = require("./../middlewares/uploadImageMiddleware");
@@ -30,12 +32,29 @@ router
   .post(
     protect,
     restrictTo("admin", "manager"),
-    uploadImage.uploadMultiImages("images", 5),
-    uploadImage.resizeImage("Masjid"),
+    // uploadImage.uploadMultiImages("images", 5),
+    // uploadImage.resizeImage("Masjid"),
     masjidValidators.createMasjid,
     addMasjid
   )
   .get(getAllMasjids);
+
+router
+  .route("/images")
+  .post(
+    protect,
+    restrictTo("admin", "manager"),
+    uploadImage.uploadMultiImages("images", 5),
+    uploadImage.resizeImage("Masjid"),
+    masjidValidators.uploadAndDeleteMasjidImages,
+    uploadMasjidImages
+  )
+  .delete(
+    protect,
+    restrictTo("admin", "manager"),
+    masjidValidators.uploadAndDeleteMasjidImages,
+    deleteMasjidImages
+  );
 
 router
   .route("/search-history")
@@ -62,11 +81,9 @@ router
 router
   .route("/:masjid_id")
   .get(masjidValidators.masjidID, getMasjid)
-  .patch(
+  .put(
     protect,
     restrictTo("admin", "manager"),
-    uploadImage.uploadMultiImages("images", 5),
-    uploadImage.resizeImage("Masjid"),
     masjidValidators.masjidID,
     masjidValidators.updateMasjid,
     updateMasjid

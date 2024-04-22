@@ -1,4 +1,4 @@
-const { Op, where } = require("sequelize");
+const { Op, where, Sequelize } = require("sequelize");
 
 const redisClient = require("./../config/redis");
 const sequelize = require("./../config/db");
@@ -31,9 +31,9 @@ function buildMasjidObject(data) {
     }
   }
 
-  if (data.longitude && data.latitude) {
-    masjidObject.geom = geomPoint(data.longitude, data.latitude);
-  }
+  // if (data.longitude && data.latitude) {
+  //   masjidObject.geom = geomPoint(data.longitude, data.latitude);
+  // }
 
   return masjidObject;
 }
@@ -60,12 +60,16 @@ function buildMasjidFeaturesObject(data) {
  * @param {array} images - An array of image paths to be uploaded
  * @return {array} An array of objects containing the image paths
  */
-function handleImageUploads(images) {
+function handleImageUploads(images, masjid_id) {
   const image_paths = [];
   for (let i = 0; i < images.length; i++) {
     image_paths.push({
       image_path: images[i],
     });
+
+    if (masjid_id) {
+      image_paths[i].masjid_id = masjid_id;
+    }
   }
   return image_paths;
 }
@@ -97,16 +101,16 @@ exports.addMasjid = async (masjid) => {
   try {
     const masjidObj = buildMasjidObject(masjid);
     const masjidFeaturesObj = buildMasjidFeaturesObject(masjid);
-    const image_paths = handleImageUploads(masjid.images);
+    // const image_paths = handleImageUploads(masjid.images);
 
     const newMasjid = await Masjid.create(
       {
         ...masjidObj,
         masjid_feature: masjidFeaturesObj,
-        masjid_images: image_paths,
+        // masjid_images: image_paths,
       },
       {
-        include: [MasjidFeatures, MasjidImages],
+        include: [MasjidFeatures],
       }
     );
 
@@ -118,9 +122,57 @@ exports.addMasjid = async (masjid) => {
     getIO().emit("addMasjidAndNotifications", "New Masjid added");
     return newMasjid;
   } catch (error) {
-    if (masjid.images) {
-      filesUtils.deleteFiles(masjid.images);
+    // if (masjid.images) {
+    //   filesUtils.deleteFiles(masjid.images);
+    // }
+    throw error;
+  }
+};
+
+exports.uploadMasjidImages = async (data) => {
+  try {
+    // check if masjid id is exist
+    const masjid = await Masjid.findByPk(data.masjid_id, {
+      include: [MasjidImages],
+    });
+    if (!masjid) {
+      throw new AppError(
+        404,
+        `Masjid with id ${data.masjid_id} not found`,
+        true
+      );
     }
+
+    if (masjid.masjid_images.length + data.images.length > 5) {
+      throw new AppError(
+        400,
+        `Masjid with id ${data.masjid_id} has reached maximum number of images`,
+        true
+      );
+    }
+
+    const image_paths = handleImageUploads(data.images, data.masjid_id);
+    await MasjidImages.bulkCreate(image_paths);
+  } catch (error) {
+    filesUtils.deleteFiles(data.images);
+    throw error;
+  }
+};
+
+exports.deleteMasjidImages = async (data) => {
+  try {
+    const masjid = await Masjid.findByPk(data.masjid_id, {
+      include: [MasjidImages],
+    });
+    if (!masjid) {
+      throw new AppError(
+        404,
+        `Masjid with id ${data.masjid_id} not found`,
+        true
+      );
+    }
+    await handleImageDeletions(data.masjid_id, data.images);
+  } catch (error) {
     throw error;
   }
 };
@@ -174,6 +226,7 @@ exports.getAllMasjids = async (config) => {
           attributes: [],
         },
       ],
+      order: [["favorites", "DESC"]],
     });
 
     return masjids;
@@ -193,6 +246,7 @@ exports.getMasjid = async (config) => {
     const { masjid_id } = config;
     let masjid = await Masjid.findOne({
       where: { id: masjid_id },
+
       include: [
         {
           model: MasjidFeatures,
@@ -261,40 +315,41 @@ exports.updateMasjid = async (masjid) => {
 
     const masjidObj = buildMasjidObject(masjid);
     const masjidFeaturesObj = buildMasjidFeaturesObject(masjid);
+
     /*
      * for update images
      * images : it's new images
      * delete_images: it's old images and delete it
      */
 
-    let cnt = await MasjidImages.count({
-      where: {
-        masjid_id: masjid.id,
-      },
-    });
+    // let cnt = await MasjidImages.count({
+    //   where: {
+    //     masjid_id: masjid.id,
+    //   },
+    // });
 
-    if (
-      masjid.delete_images &&
-      (masjid.delete_images.length > cnt ||
-        (masjid.delete_images.length === cnt &&
-          (!masjid.images || masjid.images.length === 0)))
-    ) {
-      throw new AppError(
-        400,
-        "You can't delete all images, masjid must has at least one image",
-        true
-      );
-    }
+    // if (
+    //   masjid.delete_images &&
+    //   (masjid.delete_images.length > cnt ||
+    //     (masjid.delete_images.length === cnt &&
+    //       (!masjid.images || masjid.images.length === 0)))
+    // ) {
+    //   throw new AppError(
+    //     400,
+    //     "You can't delete all images, masjid must has at least one image",
+    //     true
+    //   );
+    // }
 
-    if (masjid.delete_images) {
-      await handleImageDeletions(masjid.id, masjid.delete_images);
-      cnt -= masjid.delete_images.length;
-    }
+    // if (masjid.delete_images) {
+    //   await handleImageDeletions(masjid.id, masjid.delete_images);
+    //   cnt -= masjid.delete_images.length;
+    // }
 
-    const image_paths = handleImageUploads(masjid.images);
-    if (masjid.images && cnt + masjid.images.length > 5) {
-      throw new AppError(400, "Only 5 images are allowed", true);
-    }
+    // const image_paths = handleImageUploads(masjid.images);
+    // if (masjid.images && cnt + masjid.images.length > 5) {
+    //   throw new AppError(400, "Only 5 images are allowed", true);
+    // }
 
     await sequelize.transaction(async (t) => {
       await Masjid.update(
@@ -321,25 +376,25 @@ exports.updateMasjid = async (masjid) => {
         { transaction: t }
       );
 
-      for (const image of image_paths) {
-        await MasjidImages.create(
-          {
-            masjid_id: masjid.id,
-            image_path: image.image_path,
-          },
-          {
-            where: {
-              masjid_id: masjid.id,
-            },
-          },
-          { transaction: t }
-        );
-      }
+      // for (const image of image_paths) {
+      //   await MasjidImages.create(
+      //     {
+      //       masjid_id: masjid.id,
+      //       image_path: image.image_path,
+      //     },
+      //     {
+      //       where: {
+      //         masjid_id: masjid.id,
+      //       },
+      //     },
+      //     { transaction: t }
+      //   );
+      // }
     });
   } catch (error) {
-    if (masjid.images) {
-      filesUtils.deleteFiles(masjid.images);
-    }
+    // if (masjid.images) {
+    //   filesUtils.deleteFiles(masjid.images);
+    // }
     throw error;
   }
 };
@@ -413,6 +468,14 @@ exports.addFavorite = async (data) => {
       throw new AppError(400, "User ID and Masjid ID are required", true);
     }
     await MasjidFavorite.create(data);
+    await Masjid.increment(
+      { favorites: 1 },
+      {
+        where: {
+          id: data.masjid_id,
+        },
+      }
+    );
   } catch (error) {
     throw error;
   }
@@ -435,6 +498,15 @@ exports.deleteFavorite = async (data) => {
         masjid_id: data.masjid_id,
       },
     });
+
+    await Masjid.decrement(
+      { favorites: 1 },
+      {
+        where: {
+          id: data.masjid_id,
+        },
+      }
+    );
   } catch (error) {
     throw error;
   }

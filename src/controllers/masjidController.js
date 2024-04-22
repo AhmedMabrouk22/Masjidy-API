@@ -17,6 +17,32 @@ exports.addMasjid = catchAsync(async (req, res, next) => {
   });
 });
 
+exports.uploadMasjidImages = catchAsync(async (req, res, next) => {
+  const data = {
+    masjid_id: req.body.masjid_id,
+    images: req.body.images,
+  };
+
+  await masjidServices.uploadMasjidImages(data);
+  res.status(200).json({
+    status: httpStatus.SUCCESS,
+    message: "Masjid images uploaded successfully",
+  });
+});
+
+exports.deleteMasjidImages = catchAsync(async (req, res, next) => {
+  const data = {
+    masjid_id: req.body.masjid_id,
+    images: req.body.images,
+  };
+
+  await masjidServices.deleteMasjidImages(data);
+  res.status(200).json({
+    status: httpStatus.SUCCESS,
+    message: "Masjid images deleted successfully",
+  });
+});
+
 exports.deleteMasjid = catchAsync(async (req, res, next) => {
   await masjidServices.deleteMasjid(req.params.masjid_id);
   logger.info(

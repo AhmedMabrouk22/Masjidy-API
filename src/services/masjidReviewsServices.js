@@ -61,6 +61,13 @@ exports.getAllReviews = async (config) => {
       offset: skip,
       limit: limit,
       where,
+      attributes: {
+        exclude: ["user_id"],
+      },
+      include: {
+        model: User,
+        attributes: ["id", "first_name", "last_name", "image_path"],
+      },
     });
     return reviews;
   } catch (error) {

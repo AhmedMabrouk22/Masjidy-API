@@ -26,11 +26,6 @@ exports.createMasjid = [
     .withMessage("latitude is required")
     .isFloat()
     .withMessage("Invalid latitude"),
-  body("images")
-    .notEmpty()
-    .withMessage("Masjid images is required")
-    .isArray({ min: 1, max: 5 })
-    .withMessage("images must be an array with at least 1 and at most 5 items"),
   body("lessons")
     .optional()
     .isBoolean()
@@ -55,8 +50,26 @@ exports.createMasjid = [
     .optional()
     .isBoolean()
     .withMessage("friday_prayer must be a boolean"),
+  body("state")
+    .notEmpty()
+    .withMessage("State is required")
+    .isString()
+    .toLowerCase(),
+  body("city")
+    .notEmpty()
+    .withMessage("City is required")
+    .isString()
+    .toLowerCase(),
+  validatorMiddleware,
+];
 
-  // Todo: add state,city,district,street
+exports.uploadAndDeleteMasjidImages = [
+  body("masjid_id").notEmpty().withMessage("masjid_id is required").isInt(),
+  body("images")
+    .notEmpty()
+    .withMessage("Masjid images is required")
+    .isArray({ min: 1, max: 5 })
+    .withMessage("images must be an array with at least 1 and at most 5 items"),
   validatorMiddleware,
 ];
 
@@ -99,18 +112,6 @@ exports.updateMasjid = [
     .withMessage("latitude is required")
     .isFloat()
     .withMessage("Invalid latitude"),
-  body("images")
-    .optional()
-    .notEmpty()
-    .withMessage("Masjid images is required")
-    .isArray({ min: 0, max: 5 })
-    .withMessage("images must be an array with at least 1 and at most 5 items"),
-  body("delete_images")
-    .optional()
-    .notEmpty()
-    .withMessage("Masjid images is required")
-    .isArray({ min: 1, max: 5 })
-    .withMessage("Invalid images"),
   body("lessons")
     .optional()
     .isBoolean()
@@ -135,8 +136,18 @@ exports.updateMasjid = [
     .optional()
     .isBoolean()
     .withMessage("friday_prayer must be a boolean"),
-
-  // Todo: add state,city,district,street
+  body("state")
+    .notEmpty()
+    .withMessage("State is required")
+    .isString()
+    .toLowerCase()
+    .optional(),
+  body("city")
+    .notEmpty()
+    .withMessage("City is required")
+    .isString()
+    .toLowerCase()
+    .optional(),
   validatorMiddleware,
 ];
 

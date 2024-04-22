@@ -28,10 +28,6 @@ const Masjid = sequelize.define(
       type: DataTypes.FLOAT,
       allowNull: false,
     },
-    geom: {
-      type: DataTypes.GEOMETRY("point", 4326),
-      allowNull: false,
-    },
     state: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -48,6 +44,10 @@ const Masjid = sequelize.define(
     },
     average_rating: {
       type: DataTypes.FLOAT,
+      defaultValue: 0,
+    },
+    favorites: {
+      type: DataTypes.INTEGER,
       defaultValue: 0,
     },
   },
