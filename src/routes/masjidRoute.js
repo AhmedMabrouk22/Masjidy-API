@@ -32,8 +32,6 @@ router
   .post(
     protect,
     restrictTo("admin", "manager"),
-    // uploadImage.uploadMultiImages("images", 5),
-    // uploadImage.resizeImage("Masjid"),
     masjidValidators.createMasjid,
     addMasjid
   )
