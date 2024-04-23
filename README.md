@@ -27,7 +27,7 @@ Masjidy is an application designed to provide users with a platform to explore m
 
 - Node.js
 
-- Express.jsAPIs.
+- Express.js
 
 - PostgreSQL
 
